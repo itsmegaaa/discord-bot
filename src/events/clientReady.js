@@ -1,4 +1,4 @@
-const { REST, Routes } = require('discord.js');
+const { REST, Routes, Events } = require('discord.js');
 const fs = require('fs');
 
 module.exports = {
