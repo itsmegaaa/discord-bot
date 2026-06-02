@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const admin = require('firebase-admin'); // Tambahan Firebase Admin
 require('dotenv').config();
 
 const client = new Client({
@@ -13,6 +14,23 @@ const client = new Client({
   ],
 });
 
+// Inisialisasi Firebase Admin
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('✅ Firebase terhubung');
+  } else {
+    console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT belum diatur di environment variable.');
+  }
+} catch (error) {
+  console.error('❌ Gagal memuat kredensial Firebase:', error.message);
+}
+
+// Pasang database ke client agar bisa dipanggil via client.db di file lain
+client.db = admin.apps.length ? admin.firestore() : null;
 client.commands = new Collection();
 
 // Load commands
@@ -42,7 +60,7 @@ for (const file of eventFiles) {
   }
 }
 
-// Tambahan Penangan Interaksi (Agar Slash Commands Berfungsi)
+// Penangan Interaksi (Slash Commands)
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
