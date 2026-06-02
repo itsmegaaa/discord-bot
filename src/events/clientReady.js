@@ -1,8 +1,8 @@
-const { REST, Routes, Events } = require('discord.js');
+const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 
 module.exports = {
-  name: Events.ClientReady,
+  name: 'clientReady', // Pakai string mentah begini aja bro, anti-error 'Events is not defined'
   once: true,
   async execute(client) {
     console.log(`✅ Bot online sebagai ${client.user.tag}`);
