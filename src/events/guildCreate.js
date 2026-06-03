@@ -15,6 +15,13 @@ module.exports = {
       goodbyeChannelId: null,
       goodbyeMessage: '{user} telah meninggalkan server. Sekarang ada {count} member.',
       modLogChannelId: null,
+      levelingEnabled: true,
+      xpPerMessage: 15,
+      xpCooldownSeconds: 60,
+      levelUpChannelId: null,
+      levelRoles: [],
+      voiceXpEnabled: true,
+      voiceXpPerMinute: 5,
       createdAt: timestamp,
     }, { merge: true });
 

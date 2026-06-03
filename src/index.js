@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const admin = require('firebase-admin'); // Tambahan Firebase Admin
+const { startWeeklyReset } = require('./jobs/weeklyReset');
 require('dotenv').config();
 
 const client = new Client({
@@ -11,6 +12,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
@@ -60,5 +62,9 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args, client));
   }
 }
+
+client.once('clientReady', () => {
+  startWeeklyReset(client);
+});
 
 client.login(process.env.TOKEN);
