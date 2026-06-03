@@ -31,6 +31,7 @@ try {
 
 // Pasang database ke client agar bisa dipanggil via client.db di file lain
 client.db = admin.apps.length ? admin.firestore() : null;
+client.dbAdmin = admin.apps.length ? admin : null;
 client.commands = new Collection();
 
 // Load commands
@@ -59,28 +60,5 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args, client));
   }
 }
-
-// Penangan Interaksi (Slash Commands)
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-
-  const command = client.commands.get(interaction.commandName);
-
-  if (!command) {
-    console.error(`Perintah ${interaction.commandName} tidak ditemukan.`);
-    return;
-  }
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: 'Terjadi kesalahan saat menjalankan perintah ini!', ephemeral: true });
-    } else {
-      await interaction.reply({ content: 'Terjadi kesalahan saat menjalankan perintah ini!', ephemeral: true });
-    }
-  }
-});
 
 client.login(process.env.TOKEN);

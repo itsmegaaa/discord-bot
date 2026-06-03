@@ -1,4 +1,4 @@
-const { createCanvas, loadImage, registerFont } = require('canvas');
+const { createCanvas, loadImage } = require('canvas');
 
 async function createWelcomeCard(member) {
   const canvas = createCanvas(800, 250);
@@ -36,12 +36,12 @@ async function createWelcomeCard(member) {
   ctx.stroke();
 
   // "SELAMAT DATANG" text
-  ctx.font = 'bold 18px Sans';
+  ctx.font = 'bold 18px Arial';
   ctx.fillStyle = '#5865F2';
   ctx.fillText('SELAMAT DATANG', 250, 85);
 
   // Username
-  ctx.font = 'bold 36px Sans';
+  ctx.font = 'bold 36px Arial';
   ctx.fillStyle = '#FFFFFF';
   const username = member.user.displayName;
   ctx.fillText(
@@ -51,7 +51,7 @@ async function createWelcomeCard(member) {
   );
 
   // Server name + member count
-  ctx.font = '18px Sans';
+  ctx.font = '18px Arial';
   ctx.fillStyle = '#B9BBBE';
   ctx.fillText(
     `Member ke-${member.guild.memberCount} di ${member.guild.name}`,

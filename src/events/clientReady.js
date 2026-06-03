@@ -2,7 +2,7 @@ const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 
 module.exports = {
-  name: 'clientReady', // Pakai string mentah begini aja bro, anti-error 'Events is not defined'
+  name: 'clientReady',
   once: true,
   async execute(client) {
     console.log(`✅ Bot online sebagai ${client.user.tag}`);
@@ -20,10 +20,14 @@ module.exports = {
       }
     }
 
-    const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-    await rest.put(Routes.applicationCommands(client.user.id), {
-      body: commands,
-    });
-    console.log(`📋 ${commands.length} slash commands terdaftar`);
+    try {
+      const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+      await rest.put(Routes.applicationCommands(client.user.id), {
+        body: commands,
+      });
+      console.log(`📋 ${commands.length} slash commands terdaftar`);
+    } catch (err) {
+      console.error('❌ Gagal register slash commands:', err);
+    }
   },
 };
