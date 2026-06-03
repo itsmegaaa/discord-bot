@@ -27,6 +27,18 @@ module.exports = {
       birthdayRoleId: null,
       giveawayLogChannelId: null,
       birthdayEnabled: true,
+      automodEnabled: false,
+      logChannelId: null,
+      logMessageEdit: true,
+      logMessageDelete: true,
+      logVoiceActivity: false,
+      logMemberJoin: true,
+      logMemberLeave: true,
+      logRoleChanges: false,
+      logModActions: true,
+      antiRaidEnabled: false,
+      raidThreshold: 10,
+      adminRoleId: null,
       createdAt: timestamp,
     }, { merge: true });
 

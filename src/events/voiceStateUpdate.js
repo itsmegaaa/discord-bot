@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { logActivity } = require('../utils/activityLogger');
+const { getGuildConfig: getLogConfig, sendLog } = require('../utils/logger');
 
 const voiceSessions = new Map();
 
@@ -69,11 +70,43 @@ async function sendLevelUpMessage(member, config, newLevel) {
   await channel.send({ embeds: [embed] });
 }
 
+async function logVoiceActivity(oldState, newState, client) {
+  const guild = newState.guild || oldState.guild;
+  const member = newState.member || oldState.member;
+  const config = await getLogConfig(client, guild.id);
+  if (!config?.logVoiceActivity) return;
+
+  let detail = null;
+  if (!oldState.channelId && newState.channelId) {
+    detail = `Join voice: ${newState.channel}`;
+  } else if (oldState.channelId && !newState.channelId) {
+    detail = `Leave voice: ${oldState.channel}`;
+  } else if (oldState.channelId !== newState.channelId) {
+    detail = `Pindah voice: ${oldState.channel} -> ${newState.channel}`;
+  }
+
+  if (!detail) return;
+
+  const embed = new EmbedBuilder()
+    .setColor('#95A5A6')
+    .setTitle('Voice Activity')
+    .addFields(
+      { name: 'User', value: `${member} (${member.user.tag})` },
+      { name: 'Server', value: guild.name },
+      { name: 'Detail aksi', value: detail }
+    )
+    .setTimestamp();
+
+  await sendLog(client, guild.id, embed);
+}
+
 module.exports = {
   name: 'voiceStateUpdate',
   async execute(oldState, newState, client) {
     const member = newState.member || oldState.member;
     if (!member || member.user.bot || !client.db || !client.dbAdmin) return;
+
+    await logVoiceActivity(oldState, newState, client);
 
     const key = sessionKey(member.guild.id, member.id);
 

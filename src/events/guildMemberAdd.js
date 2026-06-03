@@ -1,5 +1,7 @@
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { createWelcomeCard } = require('../utils/welcomeCard');
+const { sendLog } = require('../utils/logger');
+const { isRaidMode, setRaidMode, trackJoin } = require('../utils/raidState');
 
 function formatMessage(template, member, memberCount) {
   return template
@@ -24,6 +26,45 @@ module.exports = {
   name: 'guildMemberAdd',
   async execute(member, client) {
     const config = await getGuildConfig(member, client);
+    const raidEntries = trackJoin(member.guild.id, member.user.tag);
+
+    if (config?.antiRaidEnabled && raidEntries.length >= (config.raidThreshold ?? 10)) {
+      setRaidMode(member.guild.id, true);
+
+      const raidEmbed = new EmbedBuilder()
+        .setColor('#ED4245')
+        .setTitle('RAID ALERT')
+        .setDescription(`${raidEntries.length} join dalam 10 detik terakhir.`)
+        .addFields(
+          { name: 'Server', value: member.guild.name },
+          { name: 'Detail aksi', value: raidEntries.slice(-10).map((entry) => entry.username).join('\n') }
+        )
+        .setTimestamp();
+
+      const mention = config.adminRoleId ? `<@&${config.adminRoleId}>` : null;
+      await sendLog(client, member.guild.id, raidEmbed);
+      if (mention) {
+        const channelId = config.logChannelId || config.modLogChannelId;
+        const channel = channelId ? await client.channels.fetch(channelId).catch(() => null) : null;
+        if (channel?.send) await channel.send(mention).catch(console.error);
+      }
+    }
+
+    if (config?.logMemberJoin) {
+      const accountAgeMs = Date.now() - member.user.createdTimestamp;
+      const isNewAccount = accountAgeMs < 7 * 24 * 60 * 60 * 1000;
+      const embed = new EmbedBuilder()
+        .setColor('#57F287')
+        .setTitle('Member Joined')
+        .addFields(
+          { name: 'User', value: `${member} (${member.user.tag})` },
+          { name: 'Server', value: member.guild.name },
+          { name: 'Detail aksi', value: `Akun dibuat: <t:${Math.floor(member.user.createdTimestamp / 1000)}:R>${isNewAccount ? '\nAkun baru < 7 hari' : ''}${isRaidMode(member.guild.id) ? '\nRAID MODE AKTIF' : ''}` }
+        )
+        .setTimestamp();
+
+      await sendLog(client, member.guild.id, embed);
+    }
 
     const autoRoleId = config?.autoRoleId || process.env.AUTO_ROLE_ID;
     if (autoRoleId) {

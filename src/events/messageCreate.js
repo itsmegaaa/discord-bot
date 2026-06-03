@@ -1,7 +1,12 @@
 const { EmbedBuilder } = require('discord.js');
+const { DEFAULT_AUTOMOD_CONFIG } = require('../commands/moderation/automod');
 const { formatDuration } = require('../commands/utility/afk');
 const { getGuildCustomCommands, normalizeTrigger } = require('../commands/utility/cc');
 const { logActivity } = require('../utils/activityLogger');
+const { IP_LOGGER_DOMAINS } = require('../utils/ipLoggerDomains');
+const { sendLog } = require('../utils/logger');
+
+const spamTracker = new Map();
 
 const DEFAULT_CONFIG = {
   levelingEnabled: true,
@@ -108,11 +113,152 @@ async function runCustomCommand(message, client) {
   if (command?.response) await message.channel.send(command.response).catch(console.error);
 }
 
+function extractDomains(content) {
+  const urlMatches = content.match(/(?:https?:\/\/|discord\.gg\/)[^\s<>)]+/gi) ?? [];
+
+  return urlMatches.map((raw) => {
+    try {
+      if (raw.toLowerCase().startsWith('discord.gg/')) return 'discord.gg';
+      return new URL(raw).hostname.toLowerCase().replace(/^www\./, '');
+    } catch {
+      return raw.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+    }
+  });
+}
+
+function memberHasBypass(member, config) {
+  if (!member) return false;
+  if (member.permissions.has('ManageMessages')) return true;
+  const bypassRoles = Array.isArray(config.bypassRoles) ? config.bypassRoles : [];
+  return bypassRoles.some((roleId) => member.roles.cache.has(roleId));
+}
+
+async function getAutomodConfig(message, client) {
+  const guildConfig = await getGuildConfig(message.guild.id, client);
+  if (!guildConfig.automodEnabled) return null;
+
+  const doc = await client.db.collection('automodConfigs').doc(message.guild.id).get();
+  const automodConfig = {
+    guildId: message.guild.id,
+    ...DEFAULT_AUTOMOD_CONFIG,
+    ...(doc.exists ? doc.data() : {}),
+  };
+
+  return automodConfig.enabled ? automodConfig : null;
+}
+
+function trackSpam(message, threshold) {
+  const key = `${message.guild.id}_${message.author.id}`;
+  const now = Date.now();
+  const timestamps = (spamTracker.get(key) ?? []).filter((timestamp) => now - timestamp <= 5000);
+  timestamps.push(now);
+  spamTracker.set(key, timestamps);
+
+  return timestamps.length > threshold;
+}
+
+function detectAutomodViolation(message, config) {
+  const content = message.content.toLowerCase();
+
+  if (config.badWordsEnabled) {
+    const badWord = (config.badWords ?? []).find((word) => word && content.includes(word.toLowerCase()));
+    if (badWord) return `Bad word terdeteksi: ${badWord}`;
+  }
+
+  if (config.antiLinkEnabled) {
+    const domains = extractDomains(message.content);
+    const allowedDomains = (config.allowedDomains ?? []).map((domain) => domain.toLowerCase().replace(/^www\./, ''));
+    const blockedDomain = domains.find((domain) => !allowedDomains.some((allowed) => domain === allowed || domain.endsWith(`.${allowed}`)));
+    if (blockedDomain) return `Link tidak diizinkan: ${blockedDomain}`;
+  }
+
+  if (config.antiMassMentionEnabled && message.mentions.users.size > config.massMentionThreshold) {
+    return `Mass mention melebihi batas (${message.mentions.users.size}/${config.massMentionThreshold})`;
+  }
+
+  if (config.antiSpamEnabled && trackSpam(message, config.antiSpamThreshold)) {
+    return `Spam terdeteksi (${config.antiSpamThreshold}+ pesan dalam 5 detik)`;
+  }
+
+  return null;
+}
+
+async function getWarnCount(db, guildId, userId) {
+  const snapshot = await db
+    .collection('warnLogs')
+    .where('guildId', '==', guildId)
+    .where('userId', '==', userId)
+    .get();
+
+  return snapshot.size;
+}
+
+async function autoWarn(message, client, reason) {
+  await client.db.collection('warnLogs').add({
+    guildId: message.guild.id,
+    userId: message.author.id,
+    moderatorId: client.user.id,
+    reason,
+    timestamp: client.dbAdmin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return getWarnCount(client.db, message.guild.id, message.author.id);
+}
+
+async function logSecurityAction(message, client, title, reason, color = '#ED4245') {
+  const embed = new EmbedBuilder()
+    .setColor(color)
+    .setTitle(title)
+    .addFields(
+      { name: 'User', value: `${message.author} (${message.author.tag})`, inline: false },
+      { name: 'Channel', value: `${message.channel}`, inline: true },
+      { name: 'Detail aksi', value: reason, inline: false }
+    )
+    .setTimestamp();
+
+  await sendLog(client, message.guild.id, embed);
+}
+
+async function handleIpLoggerProtection(message, client) {
+  const domains = extractDomains(message.content);
+  const matchedDomain = domains.find((domain) =>
+    IP_LOGGER_DOMAINS.some((blocked) => domain === blocked || domain.endsWith(`.${blocked}`))
+  );
+  if (!matchedDomain) return false;
+
+  await message.delete().catch(console.error);
+  await message.author.send('Link yang kamu kirim terdeteksi sebagai IP logger dan telah dihapus.').catch(() => null);
+  await logSecurityAction(message, client, 'IP Logger Dihapus', `Domain terdeteksi: ${matchedDomain}`);
+  return true;
+}
+
+async function handleAutoMod(message, client) {
+  const config = await getAutomodConfig(message, client);
+  if (!config || memberHasBypass(message.member, config)) return false;
+
+  const violation = detectAutomodViolation(message, config);
+  if (!violation) return false;
+
+  await message.delete().catch(console.error);
+  const totalWarns = await autoWarn(message, client, violation);
+
+  if (config.autoTimeoutEnabled && totalWarns >= config.autoTimeoutThreshold && message.member?.moderatable) {
+    await message.member.timeout(config.autoTimeoutDuration * 60 * 1000, violation).catch(console.error);
+  }
+
+  await message.author.send(`Pesanmu dihapus karena melanggar aturan server: ${violation}`).catch(() => null);
+  await logSecurityAction(message, client, 'Auto Mod Triggered', `${violation}\nTotal warn: ${totalWarns}`);
+  return true;
+}
+
 module.exports = {
   name: 'messageCreate',
   async execute(message, client) {
     if (!message.guild || message.author.bot) return;
     if (!client.db || !client.dbAdmin) return;
+
+    if (await handleIpLoggerProtection(message, client)) return;
+    if (await handleAutoMod(message, client)) return;
 
     await clearAfkStatus(message, client);
     await notifyMentionedAfkUsers(message, client);
