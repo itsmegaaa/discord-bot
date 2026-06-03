@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const admin = require('firebase-admin'); // Tambahan Firebase Admin
+const { startBirthdayChecker } = require('./jobs/birthdayChecker');
 const { startWeeklyReset } = require('./jobs/weeklyReset');
 require('dotenv').config();
 
@@ -65,6 +66,7 @@ for (const file of eventFiles) {
 
 client.once('clientReady', () => {
   startWeeklyReset(client);
+  startBirthdayChecker(client);
 });
 
 client.login(process.env.TOKEN);

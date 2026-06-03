@@ -22,6 +22,11 @@ module.exports = {
       levelRoles: [],
       voiceXpEnabled: true,
       voiceXpPerMinute: 5,
+      giveawayJoinType: 'button',
+      birthdayChannelId: null,
+      birthdayRoleId: null,
+      giveawayLogChannelId: null,
+      birthdayEnabled: true,
       createdAt: timestamp,
     }, { merge: true });
 

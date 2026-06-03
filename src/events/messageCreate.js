@@ -1,4 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
+const { formatDuration } = require('../commands/utility/afk');
+const { getGuildCustomCommands, normalizeTrigger } = require('../commands/utility/cc');
 const { logActivity } = require('../utils/activityLogger');
 
 const DEFAULT_CONFIG = {
@@ -63,10 +65,58 @@ async function sendLevelUpMessage(message, config, newLevel) {
   await channel.send({ embeds: [embed] });
 }
 
+async function clearAfkStatus(message, client) {
+  const docRef = client.db.collection('afkUsers').doc(`${message.guild.id}_${message.author.id}`);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) return;
+
+  const data = snapshot.data();
+  await docRef.delete();
+
+  if (message.member?.manageable && data.originalNickname !== undefined) {
+    await message.member.setNickname(data.originalNickname || null).catch(console.error);
+  }
+
+  const sinceMs = data.since?.toMillis?.() ?? Date.now();
+  await message.reply(`Welcome back, ${message.author}! Kamu AFK selama ${formatDuration(Date.now() - sinceMs)}.`).catch(console.error);
+}
+
+async function notifyMentionedAfkUsers(message, client) {
+  if (!message.mentions.members?.size) return;
+
+  for (const member of message.mentions.members.values()) {
+    if (member.id === message.author.id) continue;
+
+    const snapshot = await client.db.collection('afkUsers').doc(`${message.guild.id}_${member.id}`).get();
+    if (!snapshot.exists) continue;
+
+    const data = snapshot.data();
+    const sinceMs = data.since?.toMillis?.() ?? Date.now();
+    await message.reply(`⚠️ ${member.user.tag} sedang AFK: ${data.reason ?? 'AFK'} (sejak ${formatDuration(Date.now() - sinceMs)} lalu)`).catch(console.error);
+  }
+}
+
+async function runCustomCommand(message, client) {
+  const content = message.content.trim();
+  if (!content.startsWith('!')) return;
+
+  const trigger = normalizeTrigger(content.slice(1));
+  if (!trigger) return;
+
+  const commands = await getGuildCustomCommands(client.db, message.guild.id);
+  const command = commands.get(trigger);
+  if (command?.response) await message.channel.send(command.response).catch(console.error);
+}
+
 module.exports = {
   name: 'messageCreate',
   async execute(message, client) {
-    if (!message.guild || message.author.bot || !client.db || !client.dbAdmin) return;
+    if (!message.guild || message.author.bot) return;
+    if (!client.db || !client.dbAdmin) return;
+
+    await clearAfkStatus(message, client);
+    await notifyMentionedAfkUsers(message, client);
+    await runCustomCommand(message, client);
 
     const config = await getGuildConfig(message.guild.id, client);
     if (!config.levelingEnabled) return;

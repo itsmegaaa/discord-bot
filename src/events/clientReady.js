@@ -1,5 +1,6 @@
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
+const { rescheduleActiveGiveaways } = require('../commands/utility/giveaway');
 
 module.exports = {
   name: 'clientReady',
@@ -7,7 +8,6 @@ module.exports = {
   async execute(client) {
     console.log(`✅ Bot online sebagai ${client.user.tag}`);
 
-    // Register slash commands
     const commands = [];
     const folders = fs.readdirSync('./src/commands');
     for (const folder of folders) {
@@ -28,6 +28,12 @@ module.exports = {
       console.log(`📋 ${commands.length} slash commands terdaftar`);
     } catch (err) {
       console.error('❌ Gagal register slash commands:', err);
+    }
+
+    try {
+      await rescheduleActiveGiveaways(client);
+    } catch (err) {
+      console.error('Gagal re-schedule giveaway aktif:', err);
     }
   },
 };
