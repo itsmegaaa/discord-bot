@@ -780,7 +780,7 @@ Potential future improvements:
 ## 🤝 Credits
 
 **ABNRML Bot**  
-Created & Developed by **Rivaldy Taufikqul Hakim**
+Created & Developed by **eG4**
 
 Built with:
 
