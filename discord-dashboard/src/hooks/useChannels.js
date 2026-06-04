@@ -6,7 +6,9 @@ export function useChannels() {
   const { guildId } = useParams();
   const [channels, setChannels] = useState([]);
   useEffect(() => {
-    botApi.get(`/api/guilds/${guildId}/channels`).then((data) => setChannels(data.channels || []));
+    botApi.get(`/api/guilds/${guildId}/channels`)
+      .then((data) => setChannels(data.channels || []))
+      .catch(() => setChannels([]));
   }, [guildId]);
   return channels;
 }

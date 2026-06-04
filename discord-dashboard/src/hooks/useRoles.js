@@ -6,7 +6,9 @@ export function useRoles() {
   const { guildId } = useParams();
   const [roles, setRoles] = useState([]);
   useEffect(() => {
-    botApi.get(`/api/guilds/${guildId}/roles`).then((data) => setRoles(data.roles || []));
+    botApi.get(`/api/guilds/${guildId}/roles`)
+      .then((data) => setRoles(data.roles || []))
+      .catch(() => setRoles([]));
   }, [guildId]);
   return roles;
 }

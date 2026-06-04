@@ -1,8 +1,10 @@
+import FormField from './FormField.jsx';
+import Select from './Select.jsx';
+
 export default function RoleSelect({ value, onChange, roles = [], label, multiple = false }) {
   return (
-    <label className="grid gap-2 text-sm text-[#b5bac1]">
-      {label}
-      <select
+    <FormField label={label}>
+      <Select
         multiple={multiple}
         value={multiple ? value || [] : value || ''}
         onChange={(event) => {
@@ -12,7 +14,7 @@ export default function RoleSelect({ value, onChange, roles = [], label, multipl
             onChange(event.target.value || null);
           }
         }}
-        className="min-h-10 rounded border border-white/5 bg-[#2b2d31] px-3 py-2 text-[#f2f3f5] outline-none"
+        className={multiple ? 'min-h-28' : ''}
       >
         {!multiple && <option value="">Not set</option>}
         {roles.map((role) => (
@@ -20,7 +22,7 @@ export default function RoleSelect({ value, onChange, roles = [], label, multipl
             {role.name}
           </option>
         ))}
-      </select>
-    </label>
+      </Select>
+    </FormField>
   );
 }
