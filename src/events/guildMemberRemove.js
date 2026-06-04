@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
+const { logActivity } = require('../utils/activityLogger');
 const { sendLog } = require('../utils/logger');
 
 function formatMessage(template, member, memberCount) {
@@ -23,6 +24,10 @@ module.exports = {
   name: 'guildMemberRemove',
   async execute(member, client) {
     const config = await getGuildConfig(member, client);
+    await logActivity(client.db, client.dbAdmin, member.guild.id, null, null, {
+      memberLeaves: 1,
+    });
+
     if (config?.logMemberLeave) {
       const roles = member.roles.cache
         .filter((role) => role.id !== member.guild.id)

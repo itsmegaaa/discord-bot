@@ -159,7 +159,7 @@ module.exports = {
       };
     });
 
-    await logActivity(client.db, client.dbAdmin, member.guild.id, member.id, {
+    await logActivity(client.db, client.dbAdmin, member.guild.id, member.id, oldState.channelId, {
       voiceMinutes,
     });
 

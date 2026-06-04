@@ -14,7 +14,7 @@ function clamp(value, min, max) {
 }
 
 function levelColor(level) {
-  if (level >= 30) return '#FEE75C';
+  if (level >= 30) return '#F1C40F';
   if (level >= 20) return '#9B59B6';
   if (level >= 10) return '#5865F2';
   return '#57F287';
@@ -45,24 +45,65 @@ async function getRank(db, guildId, userId) {
   return index === -1 ? snapshot.size + 1 : index + 1;
 }
 
-async function createRankCard(user, data, rank) {
+function styleTokens(style, level) {
+  const accent = levelColor(level);
+  if (style === 'minimal') {
+    return {
+      background: '#F5F6F8',
+      border: '#D7DCE3',
+      text: '#1F2328',
+      muted: '#586069',
+      barBg: '#D7DCE3',
+      bar: accent,
+      accent,
+    };
+  }
+
+  if (style === 'dark') {
+    return {
+      background: '#050505',
+      border: accent,
+      text: '#FFFFFF',
+      muted: '#B9BBBE',
+      barBg: '#1F1F1F',
+      bar: accent,
+      accent,
+    };
+  }
+
+  return {
+    background: null,
+    border: '#5865F2',
+    text: '#FFFFFF',
+    muted: '#B9BBBE',
+    barBg: '#2B2D31',
+    bar: '#5865F2',
+    accent,
+  };
+}
+
+async function createRankCard(user, data, rank, style = 'default') {
   const xp = data.xp ?? 0;
   const level = data.level ?? xpToLevel(xp);
   const currentLevelXp = levelToXp(level);
   const nextLevelXp = levelToXp(level + 1);
   const progress = clamp((xp - currentLevelXp) / (nextLevelXp - currentLevelXp), 0, 1);
-  const accent = levelColor(level);
+  const tokens = styleTokens(style, level);
 
   const canvas = createCanvas(800, 200);
   const ctx = canvas.getContext('2d');
 
-  const gradient = ctx.createLinearGradient(0, 0, 800, 0);
-  gradient.addColorStop(0, '#1a1a2e');
-  gradient.addColorStop(1, '#16213e');
-  ctx.fillStyle = gradient;
+  if (style === 'default') {
+    const gradient = ctx.createLinearGradient(0, 0, 800, 0);
+    gradient.addColorStop(0, '#1a1a2e');
+    gradient.addColorStop(1, '#16213e');
+    ctx.fillStyle = gradient;
+  } else {
+    ctx.fillStyle = tokens.background;
+  }
   ctx.fillRect(0, 0, 800, 200);
 
-  ctx.strokeStyle = '#5865F2';
+  ctx.strokeStyle = tokens.border;
   ctx.lineWidth = 3;
   ctx.strokeRect(10, 10, 780, 180);
 
@@ -77,35 +118,35 @@ async function createRankCard(user, data, rank) {
 
   ctx.beginPath();
   ctx.arc(100, 100, 72, 0, Math.PI * 2);
-  ctx.strokeStyle = accent;
+  ctx.strokeStyle = tokens.accent;
   ctx.lineWidth = 5;
   ctx.stroke();
 
   ctx.font = 'bold 28px Arial';
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = tokens.text;
   const username = user.displayName.length > 22
     ? `${user.displayName.substring(0, 22)}...`
     : user.displayName;
   ctx.fillText(username, 200, 70);
 
   ctx.font = '18px Arial';
-  ctx.fillStyle = accent;
+  ctx.fillStyle = tokens.accent;
   ctx.fillText(`Level ${level}`, 200, 100);
 
-  ctx.fillStyle = '#2B2D31';
+  ctx.fillStyle = tokens.barBg;
   roundRect(ctx, 200, 120, 400, 20, 10);
   ctx.fill();
 
-  ctx.fillStyle = '#5865F2';
+  ctx.fillStyle = tokens.bar;
   roundRect(ctx, 200, 120, 400 * progress, 20, 10);
   ctx.fill();
 
   ctx.font = '16px Arial';
-  ctx.fillStyle = '#B9BBBE';
+  ctx.fillStyle = tokens.muted;
   ctx.fillText(`${Math.floor(xp).toLocaleString()} / ${Math.floor(nextLevelXp).toLocaleString()} XP`, 200, 160);
 
   ctx.font = 'bold 20px Arial';
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = tokens.text;
   ctx.fillText(`Rank #${rank}`, 650, 45);
 
   return canvas.toBuffer('image/png');
@@ -117,6 +158,17 @@ module.exports = {
     .setDescription('Lihat rank dan progress level')
     .addUserOption((o) =>
       o.setName('user').setDescription('User yang ingin dilihat rank-nya').setRequired(false)
+    )
+    .addStringOption((o) =>
+      o
+        .setName('style')
+        .setDescription('Style rank card')
+        .setRequired(false)
+        .addChoices(
+          { name: 'Default', value: 'default' },
+          { name: 'Minimal', value: 'minimal' },
+          { name: 'Dark', value: 'dark' }
+        )
     ),
 
   async execute(interaction) {
@@ -135,6 +187,7 @@ module.exports = {
     }
 
     const target = interaction.options.getUser('user') ?? interaction.user;
+    const style = interaction.options.getString('style') ?? 'default';
     const docId = `${interaction.guildId}_${target.id}`;
     const snapshot = await interaction.client.db.collection('userLevels').doc(docId).get();
     const data = snapshot.exists ? snapshot.data() : {
@@ -147,11 +200,15 @@ module.exports = {
       weeklyXp: 0,
     };
     const rank = await getRank(interaction.client.db, interaction.guildId, target.id);
-    const cardBuffer = await createRankCard(target, data, rank);
+    const cardBuffer = await createRankCard(target, data, rank, style);
     const attachment = new AttachmentBuilder(cardBuffer, {
       name: 'rank.png',
     });
 
     return interaction.reply({ files: [attachment] });
   },
+
+  createRankCard,
+  getRank,
+  levelColor,
 };

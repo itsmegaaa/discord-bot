@@ -309,7 +309,7 @@ module.exports = {
 
     if (!result) return;
 
-    await logActivity(client.db, client.dbAdmin, message.guild.id, message.author.id, {
+    await logActivity(client.db, client.dbAdmin, message.guild.id, message.author.id, message.channelId, {
       messages: 1,
     });
 

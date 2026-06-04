@@ -1,5 +1,6 @@
 const { EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const { createWelcomeCard } = require('../utils/welcomeCard');
+const { logActivity } = require('../utils/activityLogger');
 const { sendLog } = require('../utils/logger');
 const { isRaidMode, setRaidMode, trackJoin } = require('../utils/raidState');
 
@@ -26,6 +27,10 @@ module.exports = {
   name: 'guildMemberAdd',
   async execute(member, client) {
     const config = await getGuildConfig(member, client);
+    await logActivity(client.db, client.dbAdmin, member.guild.id, null, null, {
+      memberJoins: 1,
+    });
+
     const raidEntries = trackJoin(member.guild.id, member.user.tag);
 
     if (config?.antiRaidEnabled && raidEntries.length >= (config.raidThreshold ?? 10)) {
