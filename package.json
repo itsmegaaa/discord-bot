@@ -13,6 +13,7 @@
   "type": "commonjs",
   "dependencies": {
     "@discordjs/rest": "^2.6.1",
+    "@vercel/speed-insights": "^2.0.0",
     "canvas": "^3.2.3",
     "cors": "^2.8.6",
     "discord.js": "^14.26.4",

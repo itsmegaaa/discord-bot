@@ -1,6 +1,6 @@
 import { auth } from './firebase.js';
 
-const API_URL = import.meta.env.VITE_BOT_API_URL;
+const API_URL = import.meta.env.VITE_BOT_API_URL || '';
 
 function isPublicPath(path) {
   return path === '/api/auth/discord';

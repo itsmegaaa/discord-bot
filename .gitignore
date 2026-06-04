@@ -3,3 +3,5 @@ logs/
 .env
 discord-dashboard/dist/
 *.md
+*firebase-adminsdk*.json
+dc-botapi.md
