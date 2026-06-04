@@ -121,12 +121,27 @@ async function runCustomCommand(message, client) {
   const content = message.content.trim();
   if (!content.startsWith('!')) return;
 
-  const trigger = normalizeTrigger(content.slice(1));
+  const withoutPrefix = content.slice(1).trim();
+  if (!withoutPrefix) return;
+
+  const [rawTrigger, ...args] = withoutPrefix.split(/\s+/);
+  const argsText = args.join(' ');
+  const trigger = normalizeTrigger(rawTrigger);
   if (!trigger) return;
+  if (!/^[a-z0-9_-]+$/i.test(trigger)) return;
 
   const commands = await getGuildCustomCommands(client.db, message.guild.id);
   const command = commands.get(trigger);
-  if (command?.response) await message.channel.send(command.response).catch(console.error);
+  if (!command?.response) return;
+
+  const response = String(command.response)
+    .replaceAll('{user}', `${message.author}`)
+    .replaceAll('{username}', message.author.username)
+    .replaceAll('{server}', message.guild.name)
+    .replaceAll('{channel}', `${message.channel}`)
+    .replaceAll('{args}', argsText);
+
+  await message.channel.send(response).catch(console.error);
 }
 
 function extractDomains(content) {
