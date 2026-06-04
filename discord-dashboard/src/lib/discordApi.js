@@ -1,7 +1,8 @@
 export function discordAuthorizeUrl() {
+  const redirectUri = import.meta.env.VITE_DISCORD_REDIRECT_URI || `${window.location.origin}/login`;
   const params = new URLSearchParams({
     client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
-    redirect_uri: `${window.location.origin}/login`,
+    redirect_uri: redirectUri,
     response_type: 'token',
     scope: 'identify guilds',
   });

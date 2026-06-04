@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     return onAuthStateChanged(auth, async (nextUser) => {
       try {
         setUser(nextUser);
-        setError(null);
+        setError(firebaseConfigError);
         if (nextUser) {
           const token = await nextUser.getIdToken();
           const data = await botApi.get('/api/auth/guilds', token);

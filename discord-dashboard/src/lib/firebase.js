@@ -6,6 +6,8 @@ const requiredEnv = {
   VITE_FIREBASE_AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   VITE_FIREBASE_PROJECT_ID: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   VITE_FIREBASE_APP_ID: import.meta.env.VITE_FIREBASE_APP_ID,
+  VITE_DISCORD_CLIENT_ID: import.meta.env.VITE_DISCORD_CLIENT_ID,
+  VITE_BOT_API_URL: import.meta.env.VITE_BOT_API_URL,
 };
 
 const missingEnv = Object.entries(requiredEnv)

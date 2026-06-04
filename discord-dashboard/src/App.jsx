@@ -12,7 +12,8 @@ function ConfigErrorScreen({ message }) {
         <p className="mt-3 text-[#b5bac1]">{message}</p>
         <p className="mt-4 text-sm text-[#b5bac1]">
           Set env Vercel untuk VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN,
-          VITE_FIREBASE_PROJECT_ID, dan VITE_FIREBASE_APP_ID lalu redeploy.
+          VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_APP_ID, VITE_DISCORD_CLIENT_ID,
+          dan VITE_BOT_API_URL lalu redeploy.
         </p>
       </section>
     </main>

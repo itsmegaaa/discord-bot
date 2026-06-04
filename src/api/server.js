@@ -1,5 +1,7 @@
 const cors = require('cors');
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const admin = require('firebase-admin');
 const authRouter = require('./routes/auth');
 const guildsRouter = require('./routes/guilds');
@@ -10,14 +12,37 @@ require('dotenv').config();
 function initializeFirebase() {
   if (admin.apps.length) return;
 
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error('FIREBASE_SERVICE_ACCOUNT belum diatur.');
+  let serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const localServiceAccountPath = path.resolve(process.cwd(), 'serviceAccountKey.json');
+
+  if (!serviceAccountRaw && process.env.NODE_ENV !== 'production' && fs.existsSync(localServiceAccountPath)) {
+    serviceAccountRaw = fs.readFileSync(localServiceAccountPath, 'utf8');
   }
 
-  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  if (!serviceAccountRaw) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT belum diatur. Set env ini sebagai JSON service account satu baris di backend hosting.');
+  }
+
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(serviceAccountRaw);
+  } catch (err) {
+    throw new Error(`FIREBASE_SERVICE_ACCOUNT bukan JSON valid: ${err.message}`);
+  }
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
+}
+
+function allowedOrigins() {
+  const origins = new Set();
+  if (process.env.DASHBOARD_URL) origins.add(process.env.DASHBOARD_URL);
+  if (process.env.NODE_ENV !== 'production') {
+    origins.add('http://localhost:5173');
+    origins.add('http://127.0.0.1:5173');
+  }
+  return origins;
 }
 
 function attachFirebase(req, res, next) {
@@ -46,8 +71,14 @@ function createApp() {
   initializeFirebase();
 
   const app = express();
-  const dashboardOrigin = process.env.DASHBOARD_URL || true;
-  app.use(cors({ origin: dashboardOrigin }));
+  const origins = allowedOrigins();
+  app.use(cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (origins.has(origin)) return callback(null, true);
+      return callback(new Error(`CORS origin tidak diizinkan: ${origin}`));
+    },
+  }));
   app.use(securityHeaders);
   app.use(express.json({ limit: '1mb' }));
   app.use(attachFirebase);
