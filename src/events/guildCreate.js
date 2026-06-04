@@ -1,3 +1,5 @@
+const { cacheGuildResources } = require('../utils/guildCache');
+
 module.exports = {
   name: 'guildCreate',
   async execute(guild, client) {
@@ -42,6 +44,7 @@ module.exports = {
       createdAt: timestamp,
     }, { merge: true });
 
-    console.log(`✅ Bot bergabung ke server: ${guild.name}`);
+    await cacheGuildResources(client, guild);
+    console.log(`Bot bergabung ke server: ${guild.name}`);
   },
 };
