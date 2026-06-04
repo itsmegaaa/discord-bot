@@ -5,3 +5,4 @@ serviceAccountKey.json
 discord-dashboard/dist/
 *firebase-adminsdk*.json
 dc-botapi.md
+*.md
