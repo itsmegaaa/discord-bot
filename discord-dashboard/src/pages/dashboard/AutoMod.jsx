@@ -11,10 +11,12 @@ import SectionCard from '../../components/ui/SectionCard.jsx';
 import Toggle from '../../components/ui/Toggle.jsx';
 import { botApi } from '../../lib/botApi.js';
 import { useRoles } from '../../hooks/useRoles.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function AutoMod() {
   const { guildId } = useParams();
   const roles = useRoles();
+  const { toast } = useToast();
   const [automod, setAutomod] = useState({});
   const [error, setError] = useState(null);
 
@@ -25,7 +27,14 @@ export default function AutoMod() {
       .catch((err) => setError(err.message || 'Gagal memuat AutoMod.'));
   }, [guildId]);
 
-  const save = () => botApi.post(`/api/guilds/${guildId}/automod`, automod);
+  const save = async () => {
+    try {
+      await botApi.post(`/api/guilds/${guildId}/automod`, automod);
+      toast.success('AutoMod settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save AutoMod settings.');
+    }
+  };
   const list = (key) => (automod[key] || []).join(', ');
   const setList = (key, value) => setAutomod({ ...automod, [key]: value.split(',').map((item) => item.trim()).filter(Boolean) });
 

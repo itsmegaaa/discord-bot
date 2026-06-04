@@ -11,9 +11,11 @@ import SaveButton from '../../components/ui/SaveButton.jsx';
 import SectionCard from '../../components/ui/SectionCard.jsx';
 import Textarea from '../../components/ui/Textarea.jsx';
 import { botApi } from '../../lib/botApi.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function CustomCommands() {
   const { guildId } = useParams();
+  const { toast } = useToast();
   const [commands, setCommands] = useState([]);
   const [form, setForm] = useState({ trigger: '', response: '' });
   const [error, setError] = useState(null);
@@ -28,10 +30,16 @@ export default function CustomCommands() {
     load();
   }, [guildId]);
 
-  const save = () => botApi.post(`/api/guilds/${guildId}/custom-commands`, form).then(() => {
-    setForm({ trigger: '', response: '' });
-    load();
-  });
+  const save = async () => {
+    try {
+      await botApi.post(`/api/guilds/${guildId}/custom-commands`, form);
+      setForm({ trigger: '', response: '' });
+      toast.success('Custom command created.');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Failed to save custom command.');
+    }
+  };
 
   return (
     <div>
@@ -68,6 +76,27 @@ export default function CustomCommands() {
 
 function CommandRow({ item, guildId, load }) {
   const [response, setResponse] = useState(item.response || '');
+  const { toast } = useToast();
+
+  const updateCommand = async () => {
+    try {
+      await botApi.put(`/api/guilds/${guildId}/custom-commands/${item.trigger}`, { response });
+      toast.success('Custom command updated.');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update custom command.');
+    }
+  };
+
+  const deleteCommand = async () => {
+    try {
+      await botApi.delete(`/api/guilds/${guildId}/custom-commands/${item.trigger}`);
+      toast.success('Custom command deleted.');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete custom command.');
+    }
+  };
 
   return (
     <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:grid-cols-[180px_1fr_auto_auto] md:items-center">
@@ -76,8 +105,8 @@ function CommandRow({ item, guildId, load }) {
         <div className="mt-1 font-semibold text-slate-50">!{item.trigger}</div>
       </div>
       <Input value={response} onChange={(e) => setResponse(e.target.value)} />
-      <Button variant="secondary" size="sm" onClick={() => botApi.put(`/api/guilds/${guildId}/custom-commands/${item.trigger}`, { response }).then(load)}>Save</Button>
-      <Button variant="danger" size="sm" onClick={() => botApi.delete(`/api/guilds/${guildId}/custom-commands/${item.trigger}`).then(load)}>Delete</Button>
+      <Button variant="secondary" size="sm" onClick={updateCommand}>Save</Button>
+      <Button variant="danger" size="sm" onClick={deleteCommand}>Delete</Button>
     </div>
   );
 }

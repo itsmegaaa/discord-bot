@@ -1,5 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { ToastProvider } from './context/ToastContext.jsx';
 import { firebaseConfigError } from './lib/firebase.js';
 import { router } from './router/index.jsx';
 
@@ -24,8 +25,10 @@ export default function App() {
   if (firebaseConfigError) return <ConfigErrorScreen message={firebaseConfigError} />;
 
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </ToastProvider>
   );
 }

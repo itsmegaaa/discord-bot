@@ -6,7 +6,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx';
 import FormField from '../../components/ui/FormField.jsx';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import SectionCard from '../../components/ui/SectionCard.jsx';
-import Select from '../../components/ui/Select.jsx';
+import Select, { optionClassName } from '../../components/ui/Select.jsx';
 import StatCard from '../../components/ui/StatCard.jsx';
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton.jsx';
 import { botApi } from '../../lib/botApi.js';
@@ -47,9 +47,9 @@ export default function Insights() {
         actions={(
           <FormField label="Period">
             <Select value={period} onChange={(e) => setPeriod(e.target.value)} className="w-44">
-              <option value="today">Today</option>
-              <option value="week">Week</option>
-              <option value="month">Month</option>
+              <option value="today" className={optionClassName}>Today</option>
+              <option value="week" className={optionClassName}>Week</option>
+              <option value="month" className={optionClassName}>Month</option>
             </Select>
           </FormField>
         )}

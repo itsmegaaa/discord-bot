@@ -1,5 +1,5 @@
 import FormField from './FormField.jsx';
-import Select from './Select.jsx';
+import Select, { optionClassName } from './Select.jsx';
 
 export default function ChannelSelect({ value, onChange, channels = [], label }) {
   return (
@@ -8,9 +8,9 @@ export default function ChannelSelect({ value, onChange, channels = [], label })
         value={value || ''}
         onChange={(event) => onChange(event.target.value || null)}
       >
-        <option value="">Not set</option>
+        <option value="" className={optionClassName}>Not set</option>
         {channels.map((channel) => (
-          <option key={channel.id} value={channel.id}>
+          <option key={channel.id} value={channel.id} className={optionClassName}>
             {channel.type === 'voice' ? 'Voice' : '#'} {channel.name}
           </option>
         ))}

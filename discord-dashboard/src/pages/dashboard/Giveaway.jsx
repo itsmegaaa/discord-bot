@@ -9,16 +9,18 @@ import FormField from '../../components/ui/FormField.jsx';
 import PageHeader from '../../components/ui/PageHeader.jsx';
 import SaveButton from '../../components/ui/SaveButton.jsx';
 import SectionCard from '../../components/ui/SectionCard.jsx';
-import Select from '../../components/ui/Select.jsx';
+import Select, { optionClassName } from '../../components/ui/Select.jsx';
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton.jsx';
 import { botApi } from '../../lib/botApi.js';
 import { useChannels } from '../../hooks/useChannels.js';
 import { useGuildConfig } from '../../hooks/useGuildConfig.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function Giveaway() {
   const { guildId } = useParams();
   const { config, setConfig, loading, error, save } = useGuildConfig();
   const channels = useChannels();
+  const { toast } = useToast();
   const [giveaways, setGiveaways] = useState([]);
   const [listError, setListError] = useState(null);
   const load = () => botApi.get(`/api/guilds/${guildId}/giveaways`)
@@ -35,6 +37,15 @@ export default function Giveaway() {
   const active = giveaways.filter((item) => !item.ended);
   const ended = giveaways.filter((item) => item.ended).slice(0, 20);
 
+  const handleSave = async () => {
+    try {
+      await save(config);
+      toast.success('Giveaway settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save giveaway settings.');
+    }
+  };
+
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState title="Unable to load giveaway settings." description={error} />;
 
@@ -44,7 +55,7 @@ export default function Giveaway() {
         icon={Gift}
         title="Giveaway"
         subtitle="Manage running giveaways, reroll winners, and send giveaway logs to the right place."
-        actions={<SaveButton onClick={() => save(config)}>Save Settings</SaveButton>}
+        actions={<SaveButton onClick={handleSave}>Save Settings</SaveButton>}
       />
 
       <div className="grid gap-5">
@@ -52,8 +63,8 @@ export default function Giveaway() {
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Join type">
               <Select value={config.giveawayJoinType || 'button'} onChange={(e) => setConfig({ ...config, giveawayJoinType: e.target.value })}>
-                <option value="button">Button</option>
-                <option value="reaction">Reaction</option>
+                <option value="button" className={optionClassName}>Button</option>
+                <option value="reaction" className={optionClassName}>Reaction</option>
               </Select>
             </FormField>
             <ChannelSelect value={config.giveawayLogChannelId} onChange={(value) => setConfig({ ...config, giveawayLogChannelId: value })} channels={channels} label="Giveaway Log Channel" />
@@ -81,6 +92,18 @@ export default function Giveaway() {
 }
 
 function GiveawayRow({ item, guildId, load, ended }) {
+  const { toast } = useToast();
+
+  const runAction = async (request, successMessage, errorMessage) => {
+    try {
+      await request();
+      toast.success(successMessage);
+      load();
+    } catch (err) {
+      toast.error(err.message || errorMessage);
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -93,9 +116,43 @@ function GiveawayRow({ item, guildId, load, ended }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {!ended && <Button variant="danger" size="sm" onClick={() => botApi.post(`/api/guilds/${guildId}/giveaways/${item.messageId}/end`).then(load)}>End Early</Button>}
-          {ended && <Button variant="primary" size="sm" onClick={() => botApi.post(`/api/guilds/${guildId}/giveaways/${item.messageId}/reroll`).then(load)}>Reroll</Button>}
-          <Button variant="secondary" size="sm" onClick={() => botApi.delete(`/api/guilds/${guildId}/giveaways/${item.messageId}`).then(load)}>Delete</Button>
+          {!ended && (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => runAction(
+                () => botApi.post(`/api/guilds/${guildId}/giveaways/${item.messageId}/end`),
+                'Giveaway ended.',
+                'Failed to end giveaway.',
+              )}
+            >
+              End Early
+            </Button>
+          )}
+          {ended && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => runAction(
+                () => botApi.post(`/api/guilds/${guildId}/giveaways/${item.messageId}/reroll`),
+                'Winner rerolled.',
+                'Failed to reroll winner.',
+              )}
+            >
+              Reroll
+            </Button>
+          )}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => runAction(
+              () => botApi.delete(`/api/guilds/${guildId}/giveaways/${item.messageId}`),
+              'Giveaway deleted.',
+              'Failed to delete giveaway.',
+            )}
+          >
+            Delete
+          </Button>
         </div>
       </div>
     </div>

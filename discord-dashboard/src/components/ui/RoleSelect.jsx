@@ -1,5 +1,5 @@
 import FormField from './FormField.jsx';
-import Select from './Select.jsx';
+import Select, { optionClassName } from './Select.jsx';
 
 export default function RoleSelect({ value, onChange, roles = [], label, multiple = false }) {
   return (
@@ -16,9 +16,9 @@ export default function RoleSelect({ value, onChange, roles = [], label, multipl
         }}
         className={multiple ? 'min-h-28' : ''}
       >
-        {!multiple && <option value="">Not set</option>}
+        {!multiple && <option value="" className={optionClassName}>Not set</option>}
         {roles.map((role) => (
-          <option key={role.id} value={role.id}>
+          <option key={role.id} value={role.id} className={optionClassName}>
             {role.name}
           </option>
         ))}

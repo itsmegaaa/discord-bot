@@ -12,11 +12,22 @@ import LoadingSkeleton from '../../components/shared/LoadingSkeleton.jsx';
 import { useChannels } from '../../hooks/useChannels.js';
 import { useGuildConfig } from '../../hooks/useGuildConfig.js';
 import { useRoles } from '../../hooks/useRoles.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function Welcome() {
   const { config, setConfig, loading, error, save } = useGuildConfig();
   const channels = useChannels();
   const roles = useRoles();
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    try {
+      await save(config);
+      toast.success('Welcome settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save welcome settings.');
+    }
+  };
 
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState title="Unable to load welcome settings." description={error} />;
@@ -27,7 +38,7 @@ export default function Welcome() {
         icon={Sparkles}
         title="Welcome System"
         subtitle="Control how new members are greeted and what happens when they leave."
-        actions={<SaveButton onClick={() => save(config)}>Save Changes</SaveButton>}
+        actions={<SaveButton onClick={handleSave}>Save Changes</SaveButton>}
       />
       <div className="grid gap-5">
         <SectionCard title="Welcome Message" description="Choose where greetings appear and customize the first message new members see.">

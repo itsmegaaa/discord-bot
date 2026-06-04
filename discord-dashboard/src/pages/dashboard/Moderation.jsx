@@ -12,11 +12,13 @@ import LoadingSkeleton from '../../components/shared/LoadingSkeleton.jsx';
 import { botApi } from '../../lib/botApi.js';
 import { useChannels } from '../../hooks/useChannels.js';
 import { useGuildConfig } from '../../hooks/useGuildConfig.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function Moderation() {
   const { guildId } = useParams();
   const { config, setConfig, loading, error, save } = useGuildConfig();
   const channels = useChannels();
+  const { toast } = useToast();
   const [warns, setWarns] = useState([]);
   const [warnError, setWarnError] = useState(null);
   const load = () => botApi.get(`/api/guilds/${guildId}/warns`)
@@ -27,6 +29,25 @@ export default function Moderation() {
     .catch((err) => setWarnError(err.message || 'Gagal memuat warn server.'));
   useEffect(() => { load(); }, [guildId]);
 
+  const handleSave = async () => {
+    try {
+      await save(config);
+      toast.success('Moderation settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save moderation settings.');
+    }
+  };
+
+  const handleDeleteWarning = async (warnId) => {
+    try {
+      await botApi.delete(`/api/guilds/${guildId}/warns/${warnId}`);
+      toast.success('Warning deleted.');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete warning.');
+    }
+  };
+
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState title="Unable to load moderation settings." description={error} />;
 
@@ -36,7 +57,7 @@ export default function Moderation() {
         icon={Shield}
         title="Moderation"
         subtitle="Review warnings, configure moderation logs, and keep staff actions organized."
-        actions={<SaveButton onClick={() => save(config)}>Save Changes</SaveButton>}
+        actions={<SaveButton onClick={handleSave}>Save Changes</SaveButton>}
       />
       <div className="grid gap-5">
         <SectionCard title="Mod Log" description="Choose where moderation and staff action logs should be sent.">
@@ -56,7 +77,7 @@ export default function Moderation() {
                   <div className="mt-1 text-sm text-slate-300">{warn.reason}</div>
                 </div>
                 <div className="flex items-center md:justify-end">
-                  <Button variant="danger" size="sm" onClick={() => botApi.delete(`/api/guilds/${guildId}/warns/${warn.id}`).then(load)}>Delete</Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDeleteWarning(warn.id)}>Delete</Button>
                 </div>
               </div>
             ))}

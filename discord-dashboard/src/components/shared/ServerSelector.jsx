@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.js';
-import Select from '../ui/Select.jsx';
+import Select, { optionClassName } from '../ui/Select.jsx';
 
 export default function ServerSelector() {
   const { guildId } = useParams();
@@ -24,7 +24,7 @@ export default function ServerSelector() {
         aria-label="Select Discord server"
       >
         {guilds.map((guild) => (
-          <option key={guild.id} value={guild.id}>{guild.name}</option>
+          <option key={guild.id} value={guild.id} className={optionClassName}>{guild.name}</option>
         ))}
       </Select>
     </label>

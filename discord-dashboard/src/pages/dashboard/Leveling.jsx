@@ -14,11 +14,32 @@ import { botApi } from '../../lib/botApi.js';
 import { useChannels } from '../../hooks/useChannels.js';
 import { useGuildConfig } from '../../hooks/useGuildConfig.js';
 import { useRoles } from '../../hooks/useRoles.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function Leveling() {
   const { config, setConfig, loading, error, save, guildId } = useGuildConfig();
   const channels = useChannels();
   const roles = useRoles();
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    try {
+      await save(config);
+      toast.success('Leveling settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save leveling settings.');
+    }
+  };
+
+  const handleResetXp = async () => {
+    if (!window.confirm('Reset all XP?')) return;
+    try {
+      await botApi.delete(`/api/guilds/${guildId}/levels`);
+      toast.success('XP data reset.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to reset XP data.');
+    }
+  };
 
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState title="Unable to load leveling settings." description={error} />;
@@ -30,7 +51,7 @@ export default function Leveling() {
         icon={Star}
         title="Leveling & XP"
         subtitle="Reward active members with XP, levels, voice activity, and role milestones."
-        actions={<SaveButton onClick={() => save(config)}>Save Changes</SaveButton>}
+        actions={<SaveButton onClick={handleSave}>Save Changes</SaveButton>}
       />
       <div className="grid gap-5">
         <SectionCard title="XP Settings" description="Tune message XP and cooldown behavior.">
@@ -73,7 +94,7 @@ export default function Leveling() {
         </SectionCard>
 
         <SectionCard title="Danger Zone" description="Reset all XP data for this server. This action cannot be undone.">
-          <Button variant="danger" onClick={() => window.confirm('Reset all XP?') && botApi.delete(`/api/guilds/${guildId}/levels`)}>Reset All XP</Button>
+          <Button variant="danger" onClick={handleResetXp}>Reset All XP</Button>
         </SectionCard>
       </div>
     </div>

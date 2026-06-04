@@ -15,12 +15,14 @@ import { botApi } from '../../lib/botApi.js';
 import { useChannels } from '../../hooks/useChannels.js';
 import { useGuildConfig } from '../../hooks/useGuildConfig.js';
 import { useRoles } from '../../hooks/useRoles.js';
+import { useToast } from '../../hooks/useToast.js';
 
 export default function Birthday() {
   const { guildId } = useParams();
   const { config, setConfig, loading, error, save } = useGuildConfig();
   const channels = useChannels();
   const roles = useRoles();
+  const { toast } = useToast();
   const [birthdays, setBirthdays] = useState([]);
   const [listError, setListError] = useState(null);
   const load = () => botApi.get(`/api/guilds/${guildId}/birthdays`)
@@ -34,6 +36,25 @@ export default function Birthday() {
     load();
   }, [guildId]);
 
+  const handleSave = async () => {
+    try {
+      await save(config);
+      toast.success('Birthday settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save birthday settings.');
+    }
+  };
+
+  const handleDeleteBirthday = async (userId) => {
+    try {
+      await botApi.delete(`/api/guilds/${guildId}/birthdays/${userId}`);
+      toast.success('Birthday entry deleted.');
+      load();
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete birthday entry.');
+    }
+  };
+
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState title="Unable to load birthday settings." description={error} />;
 
@@ -43,7 +64,7 @@ export default function Birthday() {
         icon={Cake}
         title="Birthday"
         subtitle="Celebrate members automatically with a channel announcement and optional birthday role."
-        actions={<SaveButton onClick={() => save(config)}>Save Birthday</SaveButton>}
+        actions={<SaveButton onClick={handleSave}>Save Birthday</SaveButton>}
       />
 
       <div className="grid gap-5">
@@ -64,7 +85,7 @@ export default function Birthday() {
                   <div className="font-semibold text-slate-50">{item.userId}</div>
                   <div className="mt-1 text-sm text-slate-400">{item.day}/{item.month}</div>
                 </div>
-                <Button variant="danger" size="sm" onClick={() => botApi.delete(`/api/guilds/${guildId}/birthdays/${item.userId}`).then(load)}>Delete</Button>
+                <Button variant="danger" size="sm" onClick={() => handleDeleteBirthday(item.userId)}>Delete</Button>
               </div>
             ))}
             {!listError && !birthdays.length && <EmptyState title="No birthdays saved." description="Birthday records added from Discord will show up here." />}

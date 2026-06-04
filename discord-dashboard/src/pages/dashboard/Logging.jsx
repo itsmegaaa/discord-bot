@@ -8,6 +8,7 @@ import Toggle from '../../components/ui/Toggle.jsx';
 import LoadingSkeleton from '../../components/shared/LoadingSkeleton.jsx';
 import { useChannels } from '../../hooks/useChannels.js';
 import { useGuildConfig } from '../../hooks/useGuildConfig.js';
+import { useToast } from '../../hooks/useToast.js';
 
 const toggles = [
   ['logMessageEdit', 'Message Edit'],
@@ -22,6 +23,16 @@ const toggles = [
 export default function Logging() {
   const { config, setConfig, loading, error, save } = useGuildConfig();
   const channels = useChannels();
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    try {
+      await save(config);
+      toast.success('Logging settings saved.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save logging settings.');
+    }
+  };
 
   if (loading) return <LoadingSkeleton />;
   if (error) return <ErrorState title="Unable to load logging settings." description={error} />;
@@ -32,7 +43,7 @@ export default function Logging() {
         icon={ClipboardList}
         title="Logging"
         subtitle="Route server activity into a readable audit channel and choose which signals matter."
-        actions={<SaveButton onClick={() => save(config)}>Save Logging</SaveButton>}
+        actions={<SaveButton onClick={handleSave}>Save Logging</SaveButton>}
       />
 
       <div className="grid gap-5">
