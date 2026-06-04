@@ -1,11 +1,17 @@
+import { auth } from './firebase.js';
+
 const API_URL = import.meta.env.VITE_BOT_API_URL;
-const API_SECRET = import.meta.env.VITE_BOT_API_SECRET;
+
+function isPublicPath(path) {
+  return path === '/api/auth/discord';
+}
 
 async function request(path, options = {}) {
+  const token = options.token
+    || (!isPublicPath(path) && auth.currentUser ? await auth.currentUser.getIdToken() : null);
   const headers = {
     'Content-Type': 'application/json',
-    'x-api-secret': API_SECRET,
-    ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
   const response = await fetch(`${API_URL}${path}`, {

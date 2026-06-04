@@ -148,10 +148,14 @@ async function rescheduleActiveGiveaways(client) {
     .collection('giveaways')
     .where('ended', '==', false)
     .where('endsAt', '>', now)
+    .limit(200)
     .get();
 
   snapshot.docs.forEach((doc) => scheduleGiveaway(client, doc.data()));
   console.log(`Giveaway aktif dijadwalkan ulang: ${snapshot.size}`);
+  if (snapshot.size >= 200) {
+    console.warn('Jumlah giveaway aktif mencapai batas re-schedule 200. Sebagian giveaway mungkin belum dijadwalkan ulang.');
+  }
 }
 
 async function handleGiveawayJoin(interaction, client) {

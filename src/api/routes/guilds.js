@@ -1,5 +1,4 @@
 const express = require('express');
-const { endGiveawayByMessageId } = require('../../commands/utility/giveaway');
 
 const router = express.Router();
 
@@ -18,14 +17,28 @@ async function deleteQuery(snapshot) {
   return deletes.length;
 }
 
+function pickWinners(participants, winnersCount) {
+  const pool = [...new Set(participants)];
+  const winners = [];
+
+  while (pool.length && winners.length < winnersCount) {
+    winners.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+
+  return winners;
+}
+
 router.get('/', async (req, res, next) => {
   try {
     const snapshot = await req.db.collection('guildConfigs').get();
-    const guilds = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      name: doc.data().guildName ?? doc.id,
-      config: doc.data(),
-    }));
+    const manageableGuildIds = new Set((req.dashboardAuth?.manageableGuilds ?? []).map((guild) => guild.id));
+    const guilds = snapshot.docs
+      .filter((doc) => req.authMode === 'apiSecret' || manageableGuildIds.has(doc.id))
+      .map((doc) => ({
+        id: doc.id,
+        name: doc.data().guildName ?? doc.id,
+        config: doc.data(),
+      }));
     res.json({ guilds });
   } catch (err) {
     next(err);
@@ -102,7 +115,14 @@ router.get('/:guildId/warns', async (req, res, next) => {
 
 router.delete('/:guildId/warns/:warnId', async (req, res, next) => {
   try {
-    await req.db.collection('warnLogs').doc(req.params.warnId).delete();
+    const ref = req.db.collection('warnLogs').doc(req.params.warnId);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'Warn tidak ditemukan.' });
+    if (snap.data().guildId !== req.params.guildId) {
+      return res.status(404).json({ error: 'Warn tidak ditemukan di server ini.' });
+    }
+
+    await ref.delete();
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -129,10 +149,24 @@ router.get('/:guildId/giveaways', async (req, res, next) => {
 
 router.post('/:guildId/giveaways/:id/end', async (req, res, next) => {
   try {
-    const fakeClient = { db: req.db, dbAdmin: req.admin, channels: { fetch: async () => null } };
-    const result = await endGiveawayByMessageId(fakeClient, req.params.guildId, req.params.id, true);
-    if (result.status === 'missing') return res.status(404).json({ error: 'Giveaway tidak ditemukan.' });
-    res.json({ ok: true, result });
+    const ref = req.db.collection('giveaways').doc(docId(req.params.guildId, req.params.id));
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ error: 'Giveaway tidak ditemukan.' });
+
+    const data = snap.data();
+    const winners = data.ended
+      ? (data.winners ?? [])
+      : pickWinners(data.participants ?? [], data.winnersCount ?? 1);
+
+    if (!data.ended) {
+      await ref.set({ ended: true, winners }, { merge: true });
+    }
+
+    res.json({
+      ok: true,
+      winners,
+      note: 'Pesan giveaway di Discord tidak otomatis di-edit. Gunakan /giveaway end di Discord untuk update embed.',
+    });
   } catch (err) {
     next(err);
   }

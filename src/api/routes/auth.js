@@ -1,6 +1,8 @@
 const express = require('express');
 
 const MANAGE_GUILD = 0x20;
+const DEFAULT_EXPIRES_IN_SECONDS = 3600;
+const MAX_EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60;
 const router = express.Router();
 
 async function fetchDiscordUser(accessToken) {
@@ -23,6 +25,10 @@ router.post('/discord', async (req, res, next) => {
   try {
     const { accessToken, expiresIn } = req.body ?? {};
     if (!accessToken) return res.status(400).json({ error: 'accessToken wajib diisi.' });
+    const requestedExpiresIn = Number(expiresIn ?? DEFAULT_EXPIRES_IN_SECONDS);
+    const sessionExpiresIn = Number.isFinite(requestedExpiresIn) && requestedExpiresIn > 0
+      ? Math.min(requestedExpiresIn, MAX_EXPIRES_IN_SECONDS)
+      : DEFAULT_EXPIRES_IN_SECONDS;
 
     const [discordUser, discordGuilds] = await Promise.all([
       fetchDiscordUser(accessToken),
@@ -44,7 +50,7 @@ router.post('/discord', async (req, res, next) => {
       discordUser,
       discordAccessToken: accessToken,
       manageableGuilds,
-      expiresAt: Date.now() + Number(expiresIn ?? 3600) * 1000,
+      expiresAt: Date.now() + sessionExpiresIn * 1000,
       updatedAt: req.admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true });
 
@@ -61,17 +67,18 @@ router.post('/discord', async (req, res, next) => {
 
 router.get('/guilds', async (req, res, next) => {
   try {
-    const auth = req.header('authorization') ?? '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-    if (!token) return res.status(401).json({ error: 'Bearer token wajib diisi.' });
-
-    const decoded = await req.admin.auth().verifyIdToken(token);
-    const session = await req.db.collection('sessions').doc(decoded.uid).get();
-    if (!session.exists) return res.status(401).json({ error: 'Session tidak ditemukan.' });
-
     const botGuilds = await req.db.collection('guildConfigs').get();
     const botGuildIds = new Set(botGuilds.docs.map((doc) => doc.id));
-    const guilds = (session.data().manageableGuilds ?? [])
+
+    if (req.authMode === 'apiSecret') {
+      const guilds = botGuilds.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().guildName ?? doc.id,
+      }));
+      return res.json({ guilds });
+    }
+
+    const guilds = (req.dashboardAuth?.manageableGuilds ?? [])
       .filter((guild) => botGuildIds.has(guild.id));
 
     return res.json({ guilds });

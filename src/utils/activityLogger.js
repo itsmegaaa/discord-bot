@@ -35,7 +35,6 @@ async function updateChannelLog(db, dbAdmin, guildId, channelId, date, messages)
 async function updateServerStats(db, dbAdmin, guildId, userId, date, { messages, voiceMinutes, memberJoins = 0, memberLeaves = 0 }) {
   const docRef = db.collection('serverStats').doc(`${guildId}_${date}`);
   const increment = dbAdmin.firestore.FieldValue.increment;
-  const arrayUnion = dbAdmin.firestore.FieldValue.arrayUnion;
   const payload = {
     guildId,
     date,
@@ -46,18 +45,26 @@ async function updateServerStats(db, dbAdmin, guildId, userId, date, { messages,
   };
 
   if (userId && messages > 0) {
-    payload.activeMemberIds = arrayUnion(userId);
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(docRef);
+      const current = snapshot.exists ? snapshot.data() : {};
+      const activeMemberIds = Array.isArray(current.activeMemberIds)
+        ? [...current.activeMemberIds]
+        : [];
+
+      if (!activeMemberIds.includes(userId)) activeMemberIds.push(userId);
+
+      transaction.set(docRef, {
+        ...payload,
+        // TODO: Migrate active member tracking if guild daily activity can exceed Firestore's 10k-ish array scale.
+        activeMemberIds,
+        uniqueActiveMembers: activeMemberIds.length,
+      }, { merge: true });
+    });
+    return;
   }
 
   await docRef.set(payload, { merge: true });
-
-  if (userId && messages > 0) {
-    const snapshot = await docRef.get();
-    const activeMemberIds = snapshot.exists && Array.isArray(snapshot.data().activeMemberIds)
-      ? snapshot.data().activeMemberIds
-      : [];
-    await docRef.set({ uniqueActiveMembers: activeMemberIds.length }, { merge: true });
-  }
 }
 
 async function logActivity(db, dbAdmin, guildId, userId, channelId, { messages = 0, voiceMinutes = 0, commands = 0, memberJoins = 0, memberLeaves = 0 }) {

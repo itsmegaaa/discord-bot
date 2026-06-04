@@ -4,6 +4,7 @@ const admin = require('firebase-admin');
 const authRouter = require('./routes/auth');
 const guildsRouter = require('./routes/guilds');
 const insightsRouter = require('./routes/insights');
+const { requireDashboardAuth, requireGuildAccess } = require('./authMiddleware');
 require('dotenv').config();
 
 function initializeFirebase() {
@@ -17,19 +18,6 @@ function initializeFirebase() {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
-}
-
-function requireApiSecret(req, res, next) {
-  const expected = process.env.API_SECRET;
-  if (!expected) {
-    return res.status(500).json({ error: 'API_SECRET belum diatur.' });
-  }
-
-  if (req.header('x-api-secret') !== expected) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  return next();
 }
 
 function attachFirebase(req, res, next) {
@@ -62,14 +50,16 @@ function createApp() {
   app.use(cors({ origin: dashboardOrigin }));
   app.use(securityHeaders);
   app.use(express.json({ limit: '1mb' }));
-  app.use(requireApiSecret);
   app.use(attachFirebase);
+  app.use('/api/auth/guilds', requireDashboardAuth);
   app.use('/api/auth', authRouter);
-  app.use('/api/guilds', guildsRouter);
+  app.use('/api/guilds', requireDashboardAuth);
+  app.use('/api/guilds/:guildId', requireGuildAccess);
   app.use('/api/guilds/:guildId/insights', (req, res, next) => {
     if (!req.params.guildId) return res.status(400).json({ error: 'guildId wajib diisi.' });
     return next();
   }, insightsRouter);
+  app.use('/api/guilds', guildsRouter);
   app.use(errorHandler);
 
   return app;

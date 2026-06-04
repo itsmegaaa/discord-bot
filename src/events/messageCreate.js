@@ -7,6 +7,22 @@ const { IP_LOGGER_DOMAINS } = require('../utils/ipLoggerDomains');
 const { sendLog } = require('../utils/logger');
 
 const spamTracker = new Map();
+const SPAM_CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
+const SPAM_RETENTION_MS = 10000;
+
+const spamCleanupInterval = setInterval(() => {
+  const cutoff = Date.now() - SPAM_RETENTION_MS;
+  for (const [key, timestamps] of spamTracker.entries()) {
+    const recent = timestamps.filter((timestamp) => timestamp >= cutoff);
+    if (recent.length) {
+      spamTracker.set(key, recent);
+    } else {
+      spamTracker.delete(key);
+    }
+  }
+}, SPAM_CLEANUP_INTERVAL_MS);
+
+if (typeof spamCleanupInterval.unref === 'function') spamCleanupInterval.unref();
 
 const DEFAULT_CONFIG = {
   levelingEnabled: true,

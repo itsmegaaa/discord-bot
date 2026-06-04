@@ -116,7 +116,8 @@ module.exports = {
       return;
     }
 
-    if (!oldState.channelId || newState.channelId) return;
+    const isLeave = Boolean(oldState.channelId) && !newState.channelId;
+    if (!isLeave) return;
 
     const startedAt = voiceSessions.get(key);
     voiceSessions.delete(key);

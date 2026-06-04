@@ -1,6 +1,8 @@
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const { rescheduleActiveGiveaways } = require('../commands/utility/giveaway');
+const { startBirthdayChecker } = require('../jobs/birthdayChecker');
+const { startWeeklyReset } = require('../jobs/weeklyReset');
 const { cacheAllGuildResources } = require('../utils/guildCache');
 
 module.exports = {
@@ -42,5 +44,8 @@ module.exports = {
     } catch (err) {
       console.error('Gagal re-schedule giveaway aktif:', err);
     }
+
+    startWeeklyReset(client);
+    startBirthdayChecker(client);
   },
 };
