@@ -3,7 +3,7 @@ const fs = require('fs');
 const { rescheduleActiveGiveaways } = require('../commands/utility/giveaway');
 const { startBirthdayChecker } = require('../jobs/birthdayChecker');
 const { startWeeklyReset } = require('../jobs/weeklyReset');
-const { cacheAllGuildResources } = require('../utils/guildCache');
+const { syncAllGuilds } = require('../utils/syncGuild');
 
 module.exports = {
   name: 'clientReady',
@@ -34,9 +34,9 @@ module.exports = {
     }
 
     try {
-      await cacheAllGuildResources(client);
+      await syncAllGuilds(client);
     } catch (err) {
-      console.error('Gagal cache guild resources:', err);
+      console.error('Gagal sync guild:', err);
     }
 
     try {

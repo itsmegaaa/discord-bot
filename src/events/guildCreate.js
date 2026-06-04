@@ -1,50 +1,15 @@
-const { cacheGuildResources } = require('../utils/guildCache');
+const { syncGuild } = require('../utils/syncGuild');
 
 module.exports = {
   name: 'guildCreate',
   async execute(guild, client) {
-    if (!client.db || !client.dbAdmin) return;
-
-    const timestamp = client.dbAdmin.firestore.FieldValue.serverTimestamp();
-
-    await client.db.collection('guildConfigs').doc(guild.id).set({
-      guildId: guild.id,
-      guildName: guild.name,
-      welcomeChannelId: null,
-      welcomeMessage: 'Selamat datang {user} di {server}! Kamu adalah member ke-{count}.',
-      welcomeCardEnabled: true,
-      autoRoleId: null,
-      goodbyeChannelId: null,
-      goodbyeMessage: '{user} telah meninggalkan server. Sekarang ada {count} member.',
-      modLogChannelId: null,
-      levelingEnabled: true,
-      xpPerMessage: 15,
-      xpCooldownSeconds: 60,
-      levelUpChannelId: null,
-      levelRoles: [],
-      voiceXpEnabled: true,
-      voiceXpPerMinute: 5,
-      giveawayJoinType: 'button',
-      birthdayChannelId: null,
-      birthdayRoleId: null,
-      giveawayLogChannelId: null,
-      birthdayEnabled: true,
-      automodEnabled: false,
-      logChannelId: null,
-      logMessageEdit: true,
-      logMessageDelete: true,
-      logVoiceActivity: false,
-      logMemberJoin: true,
-      logMemberLeave: true,
-      logRoleChanges: false,
-      logModActions: true,
-      antiRaidEnabled: false,
-      raidThreshold: 10,
-      adminRoleId: null,
-      createdAt: timestamp,
-    }, { merge: true });
-
-    await cacheGuildResources(client, guild);
-    console.log(`Bot bergabung ke server: ${guild.name}`);
+    try {
+      const result = await syncGuild(client, guild);
+      if (result.ok) {
+        console.log(`Bot bergabung ke server: ${guild.name} (${result.configStatus}).`);
+      }
+    } catch (err) {
+      console.error(`Gagal sync guild baru ${guild.name} (${guild.id}):`, err);
+    }
   },
 };
