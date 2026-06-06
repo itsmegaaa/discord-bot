@@ -1,10 +1,11 @@
 import { NavLink, useParams } from 'react-router-dom';
-import { BarChart3, Bot, Cake, ClipboardList, Command, Gift, LogOut, Shield, Sparkles, Star } from 'lucide-react';
+import { BarChart3, Bot, Cake, ClipboardList, Command, Gift, LogOut, Shield, Sparkles, Star, Layers } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth.js';
 import StatusBadge from '../ui/StatusBadge.jsx';
 import ServerSelector from '../shared/ServerSelector.jsx';
 
 const items = [
+  ['modules', 'Modules', Layers],
   ['welcome', 'Welcome', Sparkles],
   ['leveling', 'Leveling', Star],
   ['moderation', 'Moderation', Shield],

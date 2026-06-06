@@ -2,6 +2,8 @@ import { createBrowserRouter, Navigate, Outlet, useParams } from 'react-router-d
 import { useAuth } from '../hooks/useAuth.js';
 import Landing from '../pages/Landing.jsx';
 import Login from '../pages/Login.jsx';
+import Terms from '../pages/Terms.jsx';
+import Privacy from '../pages/Privacy.jsx';
 import ServerList from '../pages/ServerList.jsx';
 import Welcome from '../pages/dashboard/Welcome.jsx';
 import Leveling from '../pages/dashboard/Leveling.jsx';
@@ -12,6 +14,7 @@ import Giveaway from '../pages/dashboard/Giveaway.jsx';
 import Birthday from '../pages/dashboard/Birthday.jsx';
 import CustomCommands from '../pages/dashboard/CustomCommands.jsx';
 import Insights from '../pages/dashboard/Insights.jsx';
+import Modules from '../pages/dashboard/Modules.jsx';
 import PageWrapper from '../components/layout/PageWrapper.jsx';
 import LoadingSkeleton from '../components/shared/LoadingSkeleton.jsx';
 
@@ -33,6 +36,8 @@ function RequireGuild() {
 export const router = createBrowserRouter([
   { path: '/', element: <Landing /> },
   { path: '/login', element: <Login /> },
+  { path: '/terms', element: <Terms /> },
+  { path: '/privacy', element: <Privacy /> },
   {
     element: <RequireAuth />,
     children: [
@@ -42,6 +47,7 @@ export const router = createBrowserRouter([
         element: <RequireGuild />,
         children: [
           { index: true, element: <Navigate to="welcome" replace /> },
+          { path: 'modules', element: <Modules /> },
           { path: 'welcome', element: <Welcome /> },
           { path: 'leveling', element: <Leveling /> },
           { path: 'moderation', element: <Moderation /> },
