@@ -22,8 +22,8 @@ module.exports = {
   },
 
   commands: [
-    require('../../commands/fun/rank'),
-    require('../../commands/fun/leaderboard'),
+    require('../../commands/utility/rank'),
+    require('../../commands/utility/leaderboard'),
   ],
 
   // Event messageCreate dan voiceStateUpdate sudah dihandle di events/ lama.

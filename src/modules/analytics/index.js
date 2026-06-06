@@ -23,7 +23,7 @@ module.exports = {
 
   commands: [
     require('../../commands/utility/insights'),
-    require('../../commands/fun/birthday'),
+    require('../../commands/utility/birthday'),
     require('../../commands/utility/config'),
   ],
 

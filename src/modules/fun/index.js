@@ -15,11 +15,11 @@ module.exports = {
   defaultConfig: {},
 
   commands: [
-    require('../../commands/fun/afk'),
-    require('../../commands/fun/cc'),
-    require('../../commands/fun/ship'),
-    require('../../commands/fun/profile'),
-    require('../../commands/fun/setbio'),
+    require('../../commands/utility/afk'),
+    require('../../commands/utility/cc'),
+    require('../../commands/utility/ship'),
+    require('../../commands/utility/profile'),
+    require('../../commands/utility/setbio'),
   ],
 
   events: [],
