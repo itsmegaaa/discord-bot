@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { firebaseConfigError } from './lib/firebase.js';
 import { router } from './router/index.jsx';
+import { Analytics } from '@vercel/analytics/react';
+
 
 function ConfigErrorScreen({ message }) {
   return (
@@ -28,6 +30,7 @@ export default function App() {
     <ToastProvider>
       <AuthProvider>
         <RouterProvider router={router} />
+        <Analytics />
       </AuthProvider>
     </ToastProvider>
   );

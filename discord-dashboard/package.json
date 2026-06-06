@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
+    "@vercel/analytics": "^2.0.1",
     "@vitejs/plugin-react": "^5.1.1",
     "firebase": "^12.7.0",
     "lucide-react": "^0.562.0",
