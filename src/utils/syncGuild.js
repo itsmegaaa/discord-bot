@@ -1,4 +1,5 @@
 const FIRESTORE_NOT_READY_MESSAGE = 'Firestore belum terhubung. Pastikan FIREBASE_SERVICE_ACCOUNT tersedia di service bot worker.';
+const { initGuildModules } = require('../core/guildModuleSettings');
 
 const TEXT_CHANNEL_TYPES = new Set([0, 5, 10, 11, 12, 15, 16, '0', '5', '10', '11', '12', '15', '16']);
 const VOICE_CHANNEL_TYPES = new Set([2, 13, '2', '13']);
@@ -142,6 +143,16 @@ async function syncGuild(client, guild) {
   const timestamp = client.dbAdmin.firestore.FieldValue.serverTimestamp();
   const configStatus = await syncGuildConfig(client, guild, timestamp);
   await syncGuildCache(client, guild);
+
+  // Inisialisasi modul settings untuk guild baru
+  if (configStatus === 'created') {
+    try {
+      const { registry } = require('../core/ModuleRegistry');
+      await initGuildModules(client.db, client.dbAdmin, guild.id, registry);
+    } catch (err) {
+      console.error(`syncGuild: gagal initGuildModules untuk ${guild.id}:`, err);
+    }
+  }
 
   return { ok: true, configStatus };
 }

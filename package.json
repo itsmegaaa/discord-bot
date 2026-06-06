@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "api": "node src/api/server.js"
+    "api": "node src/api/server.js",
+    "deploy": "node src/bot/deployCommands.js",
+    "test": "node --test tests/**/*.js"
   },
   "keywords": [],
   "author": "",

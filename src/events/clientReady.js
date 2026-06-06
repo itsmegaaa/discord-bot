@@ -1,9 +1,10 @@
+'use strict';
+
 const { REST, Routes } = require('discord.js');
-const fs = require('fs');
 const { rescheduleActiveGiveaways } = require('../commands/utility/giveaway');
-const { startBirthdayChecker } = require('../jobs/birthdayChecker');
-const { startWeeklyReset } = require('../jobs/weeklyReset');
 const { syncAllGuilds } = require('../utils/syncGuild');
+const { getAllCommandsJson, startModuleJobs } = require('../core/ModuleLoader');
+const { helpCommand } = require('../core/helpCommand');
 
 module.exports = {
   name: 'clientReady',
@@ -11,41 +12,25 @@ module.exports = {
   async execute(client) {
     console.log(`Bot online sebagai ${client.user.tag}`);
 
-    const commands = [];
-    const folders = fs.readdirSync('./src/commands');
-    for (const folder of folders) {
-      const files = fs
-        .readdirSync(`./src/commands/${folder}`)
-        .filter((f) => f.endsWith('.js'));
-      for (const file of files) {
-        const cmd = require(`../commands/${folder}/${file}`);
-        if (cmd.data) commands.push(cmd.data.toJSON());
-      }
-    }
+    // Slash commands registration dipindahkan ke skrip manual: src/bot/deployCommands.js
+    // untuk mencegah rate limit akibat mendeploy command setiap bot merestart.
 
-    try {
-      const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-      await rest.put(Routes.applicationCommands(client.user.id), {
-        body: commands,
-      });
-      console.log(`${commands.length} slash commands terdaftar`);
-    } catch (err) {
-      console.error('Gagal register slash commands:', err);
-    }
-
+    // ── Sync guild cache ke Firestore ───────────────────────────────────────
     try {
       await syncAllGuilds(client);
     } catch (err) {
       console.error('Gagal sync guild:', err);
     }
 
+    // ── Reschedule giveaway aktif yang mungkin terputus ─────────────────────
     try {
       await rescheduleActiveGiveaways(client);
     } catch (err) {
       console.error('Gagal re-schedule giveaway aktif:', err);
     }
 
-    startWeeklyReset(client);
-    startBirthdayChecker(client);
+    // ── Start semua job dari modul yang terdaftar ───────────────────────────
+    const { registry } = require('../core/ModuleRegistry');
+    startModuleJobs(client, registry);
   },
 };

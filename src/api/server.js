@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 const authRouter = require('./routes/auth');
 const guildsRouter = require('./routes/guilds');
 const insightsRouter = require('./routes/insights');
+const modulesRouter = require('./routes/modules');
 const { requireDashboardAuth, requireGuildAccess } = require('./authMiddleware');
 require('dotenv').config();
 
@@ -90,6 +91,7 @@ function createApp() {
     if (!req.params.guildId) return res.status(400).json({ error: 'guildId wajib diisi.' });
     return next();
   }, insightsRouter);
+  app.use('/api/guilds/:guildId/modules', requireGuildAccess, modulesRouter);
   app.use('/api/guilds', guildsRouter);
   app.use(errorHandler);
 
