@@ -1,6 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
 const cron = require('node-cron');
 
+/** Durasi satu hari dalam milidetik. */
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 function jakartaDayMonth(date = new Date()) {
   const day = Number(new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
@@ -22,9 +25,13 @@ async function getGuildConfig(client, guildId) {
 async function removeBirthdayRoleLater(member, role) {
   setTimeout(async () => {
     await member.roles.remove(role).catch(console.error);
-  }, 24 * 60 * 60 * 1000);
+  }, ONE_DAY_MS);
 }
 
+/**
+ * Cek birthday hari ini (timezone Jakarta) dan kirim ucapan + assign birthday role.
+ * Dipanggil oleh cron job setiap hari pukul 08:00 WIB.
+ */
 async function runBirthdayCheck(client) {
   if (!client.db) return;
 

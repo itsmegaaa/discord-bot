@@ -5,26 +5,9 @@ const {
   EmbedBuilder,
   SlashCommandBuilder,
 } = require('discord.js');
+const { parseDurationMs } = require('../../utils/firestoreUtils');
 
 const pollTimeouts = new Map();
-
-function parseDuration(input) {
-  if (!input) return null;
-
-  const match = /^(\d+)\s*(s|m|h|d)$/i.exec(input.trim());
-  if (!match) return undefined;
-
-  const amount = Number(match[1]);
-  const unit = match[2].toLowerCase();
-  const multipliers = {
-    s: 1000,
-    m: 60 * 1000,
-    h: 60 * 60 * 1000,
-    d: 24 * 60 * 60 * 1000,
-  };
-
-  return amount > 0 ? amount * multipliers[unit] : undefined;
-}
 
 function pollDocId(guildId, messageId) {
   return `${guildId}_${messageId}`;
@@ -214,11 +197,13 @@ module.exports = {
       return interaction.reply({ content: result.status === 'missing' ? 'Poll tidak ditemukan.' : 'Poll sudah ditutup.', ephemeral: true });
     }
 
+    // Input null/kosong berarti durasi tidak diset (valid)
+    // Input ada tapi format salah berarti error
     const durationInput = interaction.options.getString('durasi');
-    const durationMs = parseDuration(durationInput);
-    if (durationMs === undefined) {
+    if (durationInput && !parseDurationMs(durationInput)) {
       return interaction.reply({ content: 'Durasi tidak valid. Pakai format seperti `30m`, `1h`, atau `7d`.', ephemeral: true });
     }
+    const durationMs = durationInput ? parseDurationMs(durationInput) : null;
 
     const options = ['opsi1', 'opsi2', 'opsi3', 'opsi4']
       .map((name) => interaction.options.getString(name))

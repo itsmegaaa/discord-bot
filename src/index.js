@@ -15,27 +15,34 @@ const client = new Client({
   ],
 });
 
-// Inisialisasi Firebase Admin
-try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    console.log('✅ Firebase terhubung');
-  } else {
-    console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT belum diatur di environment variable.');
+/**
+ * Inisialisasi Firebase Admin SDK dari environment variable.
+ * Mengikuti pola yang sama dengan src/api/server.js.
+ */
+function initializeFirebase() {
+  try {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+      console.log('✅ Firebase terhubung');
+    } else {
+      console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT belum diatur di environment variable.');
+    }
+  } catch (error) {
+    console.error('❌ Gagal memuat kredensial Firebase:', error.message);
   }
-} catch (error) {
-  console.error('❌ Gagal memuat kredensial Firebase:', error.message);
 }
+
+initializeFirebase();
 
 // Pasang database ke client agar bisa dipanggil via client.db di file lain
 client.db = admin.apps.length ? admin.firestore() : null;
 client.dbAdmin = admin.apps.length ? admin : null;
 client.commands = new Collection();
 
-// Load commands
+// Load commands dari semua subfolder di src/commands/
 const commandFolders = fs.readdirSync('./src/commands');
 for (const folder of commandFolders) {
   const commandFiles = fs
@@ -49,7 +56,7 @@ for (const folder of commandFolders) {
   }
 }
 
-// Load events
+// Load events dari src/events/
 const eventFiles = fs
   .readdirSync('./src/events')
   .filter((f) => f.endsWith('.js'));

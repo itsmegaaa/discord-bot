@@ -17,13 +17,13 @@ module.exports = {
 
   async execute(interaction) {
     const target = interaction.options.getMember('target');
-    const alasan = interaction.options.getString('alasan') ?? 'Tidak ada alasan';
-    const hapusPesan = interaction.options.getInteger('hapus_pesan') ?? 0;
+    const reason = interaction.options.getString('alasan') ?? 'Tidak ada alasan';
+    const deleteMessageDays = interaction.options.getInteger('hapus_pesan') ?? 0;
 
     if (!target) return interaction.reply({ content: '❌ Member tidak ditemukan.', ephemeral: true });
     if (!target.bannable) return interaction.reply({ content: '❌ Aku tidak bisa ban member ini.', ephemeral: true });
 
-    await target.ban({ deleteMessageSeconds: hapusPesan * 86400, reason: alasan });
+    await target.ban({ deleteMessageSeconds: deleteMessageDays * 86400, reason });
 
     const embed = new EmbedBuilder()
       .setColor('#ED4245')
@@ -31,7 +31,7 @@ module.exports = {
       .addFields(
         { name: 'Member', value: `${target.user.tag}`, inline: true },
         { name: 'Moderator', value: `${interaction.user.tag}`, inline: true },
-        { name: 'Alasan', value: alasan }
+        { name: 'Alasan', value: reason }
       )
       .setTimestamp();
 

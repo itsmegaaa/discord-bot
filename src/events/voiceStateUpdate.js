@@ -1,9 +1,11 @@
 const { EmbedBuilder } = require('discord.js');
 const { logActivity } = require('../utils/activityLogger');
 const { getGuildConfig: getLogConfig, sendLog } = require('../utils/logger');
+const { assignLevelRoles, sendLevelUpMessage, xpToLevel } = require('../utils/levelingUtils');
 
 const voiceSessions = new Map();
 
+/** Default config untuk fitur voice XP guild. */
 const DEFAULT_CONFIG = {
   voiceXpEnabled: true,
   voiceXpPerMinute: 5,
@@ -11,14 +13,16 @@ const DEFAULT_CONFIG = {
   levelRoles: [],
 };
 
-function xpToLevel(xp) {
-  return Math.floor(0.1 * Math.sqrt(xp));
-}
-
+/**
+ * Buat key unik untuk session voice per member per guild.
+ */
 function sessionKey(guildId, userId) {
   return `${guildId}_${userId}`;
 }
 
+/**
+ * Ambil konfigurasi guild dari Firestore, dengan fallback ke DEFAULT_CONFIG.
+ */
 async function getGuildConfig(guildId, client) {
   if (!client.db) return DEFAULT_CONFIG;
 
@@ -32,42 +36,6 @@ async function getGuildConfig(guildId, client) {
     console.error('Gagal membaca guild config voice XP:', err);
     return DEFAULT_CONFIG;
   }
-}
-
-async function resolveLevelUpChannel(guild, config) {
-  if (config.levelUpChannelId) {
-    try {
-      return await guild.channels.fetch(config.levelUpChannelId);
-    } catch (err) {
-      console.error('Gagal mengambil channel level up:', err);
-    }
-  }
-
-  return guild.systemChannel;
-}
-
-async function assignLevelRoles(member, levelRoles, oldLevel, newLevel) {
-  const rewards = Array.isArray(levelRoles)
-    ? levelRoles.filter((reward) => reward.level > oldLevel && reward.level <= newLevel)
-    : [];
-
-  for (const reward of rewards) {
-    const role = member.guild.roles.cache.get(reward.roleId);
-    if (role) await member.roles.add(role).catch(console.error);
-  }
-}
-
-async function sendLevelUpMessage(member, config, newLevel) {
-  const channel = await resolveLevelUpChannel(member.guild, config);
-  if (!channel?.send) return;
-
-  const embed = new EmbedBuilder()
-    .setColor('#57F287')
-    .setTitle('Level Up!')
-    .setDescription(`${member} naik ke **Level ${newLevel}**!`)
-    .setTimestamp();
-
-  await channel.send({ embeds: [embed] });
 }
 
 async function logVoiceActivity(oldState, newState, client) {

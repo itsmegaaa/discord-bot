@@ -5,10 +5,17 @@ const PERIOD_DAYS = {
   alltime: null,
 };
 
+/** Format Date ke string 'YYYY-MM-DD' (UTC). */
 function dateKey(date) {
   return date.toISOString().split('T')[0];
 }
 
+/**
+ * Kembalikan array date string untuk N hari ke belakang (UTC).
+ * Jika period = 'alltime', kembalikan null (berarti semua data).
+ * @param {'today'|'week'|'month'|'alltime'} period
+ * @returns {string[]|null}
+ */
 function getDateKeys(period = 'week') {
   const days = PERIOD_DAYS[period] ?? PERIOD_DAYS.week;
   if (!days) return null;
@@ -62,6 +69,13 @@ async function getServerStats(db, guildId, period = 'week') {
   return rows.filter((row) => matchesPeriod(row, keys));
 }
 
+/**
+ * Ambil server stats untuk N hari ke belakang, diurutkan ascending.
+ * Menggunakan loop sendiri karena jumlah hari bersifat dinamis (tidak ada di PERIOD_DAYS).
+ * @param {FirebaseFirestore.Firestore} db
+ * @param {string} guildId
+ * @param {number} days
+ */
 async function getServerStatsByDays(db, guildId, days = 30) {
   const keys = [];
   for (let i = 0; i < days; i += 1) {

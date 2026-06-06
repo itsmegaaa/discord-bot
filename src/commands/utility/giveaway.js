@@ -6,36 +6,9 @@ const {
   EmbedBuilder,
   SlashCommandBuilder,
 } = require('discord.js');
+const { parseDurationMs, pickWinners } = require('../../utils/firestoreUtils');
 
 const giveawayTimeouts = new Map();
-
-function parseDuration(input) {
-  const match = /^(\d+)\s*(s|m|h|d)$/i.exec(input.trim());
-  if (!match) return null;
-
-  const amount = Number(match[1]);
-  const unit = match[2].toLowerCase();
-  const multipliers = {
-    s: 1000,
-    m: 60 * 1000,
-    h: 60 * 60 * 1000,
-    d: 24 * 60 * 60 * 1000,
-  };
-
-  return amount > 0 ? amount * multipliers[unit] : null;
-}
-
-function pickWinners(participants, winnersCount) {
-  const pool = [...new Set(participants)];
-  const winners = [];
-
-  while (pool.length && winners.length < winnersCount) {
-    const index = Math.floor(Math.random() * pool.length);
-    winners.push(pool.splice(index, 1)[0]);
-  }
-
-  return winners;
-}
 
 function giveawayDocId(guildId, messageId) {
   return `${guildId}_${messageId}`;
@@ -240,7 +213,7 @@ module.exports = {
 
     if (subcommand === 'start') {
       const channel = interaction.options.getChannel('channel');
-      const durationMs = parseDuration(interaction.options.getString('durasi'));
+      const durationMs = parseDurationMs(interaction.options.getString('durasi'));
       const prize = interaction.options.getString('hadiah');
       const winnersCount = interaction.options.getInteger('winners');
 

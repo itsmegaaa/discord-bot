@@ -1,4 +1,5 @@
 const express = require('express');
+const { pickWinners } = require('../../utils/firestoreUtils');
 
 const router = express.Router();
 
@@ -15,17 +16,6 @@ async function deleteQuery(snapshot) {
   const deletes = snapshot.docs.map((doc) => doc.ref.delete());
   await Promise.all(deletes);
   return deletes.length;
-}
-
-function pickWinners(participants, winnersCount) {
-  const pool = [...new Set(participants)];
-  const winners = [];
-
-  while (pool.length && winners.length < winnersCount) {
-    winners.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-  }
-
-  return winners;
 }
 
 router.get('/', async (req, res, next) => {
@@ -177,12 +167,9 @@ router.post('/:guildId/giveaways/:id/reroll', async (req, res, next) => {
     const ref = req.db.collection('giveaways').doc(docId(req.params.guildId, req.params.id));
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ error: 'Giveaway tidak ditemukan.' });
+
     const data = snap.data();
-    const pool = [...new Set(data.participants ?? [])];
-    const winners = [];
-    while (pool.length && winners.length < (data.winnersCount ?? 1)) {
-      winners.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
-    }
+    const winners = pickWinners(data.participants ?? [], data.winnersCount ?? 1);
     await ref.set({ winners }, { merge: true });
     res.json({ ok: true, winners });
   } catch (err) {

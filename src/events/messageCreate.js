@@ -5,10 +5,13 @@ const { getGuildCustomCommands, normalizeTrigger } = require('../commands/utilit
 const { logActivity } = require('../utils/activityLogger');
 const { IP_LOGGER_DOMAINS } = require('../utils/ipLoggerDomains');
 const { sendLog } = require('../utils/logger');
+const { assignLevelRoles, sendLevelUpMessage, xpToLevel } = require('../utils/levelingUtils');
 
 const spamTracker = new Map();
 const SPAM_CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
-const SPAM_RETENTION_MS = 10000;
+const SPAM_RETENTION_MS = 10_000;
+/** Jendela waktu deteksi spam (ms). Pesan dalam rentang ini dihitung sebagai spam. */
+const SPAM_WINDOW_MS = 5_000;
 
 const spamCleanupInterval = setInterval(() => {
   const cutoff = Date.now() - SPAM_RETENTION_MS;
@@ -24,6 +27,7 @@ const spamCleanupInterval = setInterval(() => {
 
 if (typeof spamCleanupInterval.unref === 'function') spamCleanupInterval.unref();
 
+/** Default config leveling jika guild belum memiliki konfigurasi. */
 const DEFAULT_CONFIG = {
   levelingEnabled: true,
   xpPerMessage: 15,
@@ -32,10 +36,11 @@ const DEFAULT_CONFIG = {
   levelRoles: [],
 };
 
-function xpToLevel(xp) {
-  return Math.floor(0.1 * Math.sqrt(xp));
-}
-
+/**
+ * Ambil konfigurasi guild dari Firestore, dengan fallback ke DEFAULT_CONFIG.
+ * @param {string} guildId
+ * @param {import('discord.js').Client} client
+ */
 async function getGuildConfig(guildId, client) {
   if (!client.db) return DEFAULT_CONFIG;
 
@@ -49,41 +54,6 @@ async function getGuildConfig(guildId, client) {
     console.error('Gagal membaca guild config leveling:', err);
     return DEFAULT_CONFIG;
   }
-}
-
-async function resolveLevelUpChannel(guild, fallbackChannel, config) {
-  if (!config.levelUpChannelId) return fallbackChannel;
-
-  try {
-    return await guild.channels.fetch(config.levelUpChannelId);
-  } catch (err) {
-    console.error('Gagal mengambil channel level up:', err);
-    return fallbackChannel;
-  }
-}
-
-async function assignLevelRoles(member, levelRoles, oldLevel, newLevel) {
-  const rewards = Array.isArray(levelRoles)
-    ? levelRoles.filter((reward) => reward.level > oldLevel && reward.level <= newLevel)
-    : [];
-
-  for (const reward of rewards) {
-    const role = member.guild.roles.cache.get(reward.roleId);
-    if (role) await member.roles.add(role).catch(console.error);
-  }
-}
-
-async function sendLevelUpMessage(message, config, newLevel) {
-  const channel = await resolveLevelUpChannel(message.guild, message.channel, config);
-  if (!channel?.send) return;
-
-  const embed = new EmbedBuilder()
-    .setColor('#57F287')
-    .setTitle('Level Up!')
-    .setDescription(`${message.author} naik ke **Level ${newLevel}**!`)
-    .setTimestamp();
-
-  await channel.send({ embeds: [embed] });
 }
 
 async function clearAfkStatus(message, client) {
@@ -178,10 +148,14 @@ async function getAutomodConfig(message, client) {
   return automodConfig.enabled ? automodConfig : null;
 }
 
+/**
+ * Lacak frekuensi pesan per user untuk deteksi spam.
+ * Mengembalikan true jika jumlah pesan dalam SPAM_WINDOW_MS melebihi threshold.
+ */
 function trackSpam(message, threshold) {
   const key = `${message.guild.id}_${message.author.id}`;
   const now = Date.now();
-  const timestamps = (spamTracker.get(key) ?? []).filter((timestamp) => now - timestamp <= 5000);
+  const timestamps = (spamTracker.get(key) ?? []).filter((timestamp) => now - timestamp <= SPAM_WINDOW_MS);
   timestamps.push(now);
   spamTracker.set(key, timestamps);
 
