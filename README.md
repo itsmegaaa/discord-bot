@@ -1,49 +1,54 @@
-<div align="center">
-
 # ⚡ ABNRML Bot
 
-### Discord community management bot with dashboard, automation, moderation, leveling, giveaways, and server insights.
+### Discord community management bot with web dashboard, modular features, moderation, leveling, giveaways, reaction roles, privacy tools, and server insights.
 
-Built to keep Discord servers cleaner, safer, and more alive without making admins babysit every channel like overworked NPCs.
+ABNRML Bot is built to help Discord communities manage automation, moderation, engagement, and server configuration without forcing every admin to memorize slash commands like it is some ancient curse.
 
-<br />
+![Node.js](https://img.shields.io/badge/Node.js-1f2937?style=for-the-badge&logo=node.js)
+![Discord.js](https://img.shields.io/badge/Discord.js-v14-5865F2?style=for-the-badge&logo=discord)
+![Firebase](https://img.shields.io/badge/Firebase-Firestore-ffca28?style=for-the-badge&logo=firebase)
+![React](https://img.shields.io/badge/React-Dashboard-61dafb?style=for-the-badge&logo=react)
+![Vite](https://img.shields.io/badge/Vite-Frontend-646cff?style=for-the-badge&logo=vite)
+![Railway](https://img.shields.io/badge/Railway-Backend-0b0d0e?style=for-the-badge&logo=railway)
+![Vercel](https://img.shields.io/badge/Vercel-Frontend-000000?style=for-the-badge&logo=vercel)
 
-![Node.js](https://img.shields.io/badge/Node.js-Backend-339933?style=for-the-badge&logo=node.js&logoColor=white)
-![Discord.js](https://img.shields.io/badge/Discord.js-Bot-5865F2?style=for-the-badge&logo=discord&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-Database%20%26%20Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![React](https://img.shields.io/badge/React-Dashboard-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-Frontend-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![Railway](https://img.shields.io/badge/Railway-API%20Hosting-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-Web%20Hosting-000000?style=for-the-badge&logo=vercel&logoColor=white)
-
-<br />
-
-**Created & Developed by Rivaldy Taufikqul Hakim**
-
-</div>
+Created & Developed by **Rivaldy Taufikqul Hakim / eG4**
 
 ---
 
 ## ✨ Overview
 
-**ABNRML Bot** is a multifunctional Discord bot built for community management, automation, engagement, and moderation.
+ABNRML Bot is a multifunctional Discord bot for community management, automation, moderation, engagement, and server configuration.
 
-It comes with a web dashboard, Firebase-backed data storage, Discord OAuth login, and modular server configuration.
+The project includes:
 
-The bot is designed for communities that want to manage their Discord server without turning every staff member into a sleep-deprived command-line goblin.
+- Discord bot worker powered by `discord.js`
+- Express backend API
+- React + Vite dashboard
+- Discord OAuth login
+- Firebase Authentication
+- Firebase Firestore database
+- Modular feature system
+- Per-server module configuration
+- Privacy and data commands
+- Public Terms of Service and Privacy Policy pages
+
+The goal is simple: make Discord server management less painful, less manual, and less dependent on someone typing commands at 3 AM like a sleep-deprived server goblin.
 
 ---
 
-## 🚀 Live Services
+## 🔗 Live Services
 
 | Service | URL |
 |---|---|
 | Web Dashboard | `https://discord-bot-eta-ten.vercel.app` |
 | Backend API | `https://discord-bot-production-2e68.up.railway.app` |
+| Terms of Service | `https://discord-bot-eta-ten.vercel.app/terms` |
+| Privacy Policy | `https://discord-bot-eta-ten.vercel.app/privacy` |
 
-> The backend root route may show `Cannot GET /`. That is normal. This project exposes API routes under `/api`.
+> The backend root route may show `Cannot GET /`. That is normal. API routes live under `/api`.
 
-API health-style check:
+API protected route check:
 
 ```txt
 https://discord-bot-production-2e68.up.railway.app/api/auth/guilds
@@ -57,25 +62,63 @@ Expected unauthenticated response:
 }
 ```
 
-That means the API is alive and protected. Annoying, but functional.
+If you see that, the API is alive and protected. Annoying, but functional.
 
 ---
 
-## 🧩 Core Features
+## 🚀 Core Features
+
+### 🧩 Modular System
+
+ABNRML Bot is moving toward a module-based architecture so features can be enabled, disabled, and configured per server.
+
+Current modular direction:
+
+- Module registry
+- Module loader
+- Per-guild module settings
+- Module enable/disable system
+- Dashboard module manager
+- Config per module
+- Permission-aware feature access
+
+Example module categories:
+
+- Welcome
+- Leveling
+- Moderation
+- AutoMod
+- Logging
+- Giveaway
+- Reaction Roles
+- Privacy
+- Analytics
+- Fun
+
+---
 
 ### 🖥️ Web Dashboard
 
-Manage server configuration through a clean web dashboard.
+Manage the bot from a web dashboard instead of forcing server staff to cosplay as terminal users.
+
+Dashboard features:
 
 - Discord OAuth login
 - Server selection
 - Guild-based access control
 - Firebase custom token authentication
 - Dashboard-first configuration
+- Module manager
+- Public legal pages
+- Vercel Analytics integration
+
+---
 
 ### 👋 Welcome & Goodbye System
 
-Welcome new members and send goodbye messages when they leave.
+Automate member onboarding and departure messages.
+
+Features:
 
 - Custom welcome message
 - Custom goodbye message
@@ -84,40 +127,60 @@ Welcome new members and send goodbye messages when they leave.
 - Welcome card support
 - Auto role for new members
 
+---
+
 ### 📈 Leveling System
 
 Increase community engagement with XP and levels.
+
+Features:
 
 - Message XP
 - Voice XP
 - XP cooldown
 - Level up channel
 - Role rewards
-- Reset all XP
+- Rank command
+- Leaderboard command
+- Reset XP support
+
+---
 
 ### 🛡️ Moderation
 
-Basic moderation management for staff.
+Basic moderation system for server staff.
 
-- Mod log channel
+Features:
+
 - Warn management
 - Warning logs
 - Delete warnings
+- Mod log channel
+- Timeout support
+- Staff-focused moderation flow
+
+---
 
 ### 🤖 AutoMod
 
-Reduce spam and chaos before it becomes everyone’s problem.
+Reduce chaos before everyone starts pinging staff like it is a public emergency.
 
-- Bad words filter
+Features:
+
+- Bad word filter
 - Anti-spam
 - Anti-link
 - Anti-mass mention
 - Auto timeout
 - Bypass roles
 
+---
+
 ### 🧾 Logging
 
 Track important server activity.
+
+Features:
 
 - Message edit logs
 - Message delete logs
@@ -127,9 +190,13 @@ Track important server activity.
 - Role change logs
 - Moderation action logs
 
+---
+
 ### 🎉 Giveaway
 
-Manage giveaways from the dashboard.
+Manage giveaways directly from commands or dashboard flow.
+
+Features:
 
 - Active giveaway list
 - End giveaway early
@@ -137,20 +204,48 @@ Manage giveaways from the dashboard.
 - Delete giveaway
 - Button or reaction join mode
 
+---
+
+### 🎭 Reaction Roles
+
+Let members take roles through reactions or interaction-based setup.
+
+Useful for:
+
+- Gender roles
+- Interest roles
+- Announcement roles
+- Event roles
+- Community access roles
+
+Recommended future dashboard controls:
+
+- Select channel
+- Select message
+- Select emoji
+- Select role
+- Add/edit/delete reaction role setup
+
+---
+
 ### 🎂 Birthday Reminder
 
 Celebrate member birthdays automatically.
+
+Features:
 
 - Birthday channel
 - Birthday role
 - Birthday list
 - Delete birthday data
 
+---
+
 ### ⚙️ Custom Commands
 
 Create simple text-based commands for server information.
 
-Example:
+Examples:
 
 ```txt
 !rules
@@ -158,9 +253,29 @@ Example:
 !jadwal
 ```
 
+---
+
+### 🔐 Privacy & Data Tools
+
+The bot includes privacy-focused slash commands for user data transparency.
+
+Commands:
+
+```txt
+/mydata
+/exportmydata
+/deletemydata
+```
+
+These commands help users check, export, or request deletion of supported stored data.
+
+---
+
 ### 📊 Server Insights
 
 View server activity and engagement data.
+
+Features:
 
 - Total messages
 - Active members
@@ -172,19 +287,20 @@ View server activity and engagement data.
 
 ---
 
-## 🏗️ Tech Stack
+## 🧱 Tech Stack
 
 | Layer | Technology |
 |---|---|
 | Bot Runtime | Node.js |
-| Discord Library | Discord.js |
+| Discord Library | discord.js v14 |
+| Backend API | Express.js |
 | Frontend | React + Vite |
 | Styling | Tailwind CSS |
-| Backend API | Express.js |
 | Auth | Discord OAuth + Firebase Auth |
 | Database | Firebase Firestore |
 | Backend Hosting | Railway |
 | Frontend Hosting | Vercel |
+| Analytics | Vercel Analytics |
 
 ---
 
@@ -197,8 +313,13 @@ discord-bot/
 │  │  ├─ routes/
 │  │  ├─ server.js
 │  │  └─ authMiddleware.js
+│  ├─ bot/
+│  │  └─ deployCommands.js
 │  ├─ commands/
+│  ├─ core/
 │  ├─ events/
+│  ├─ modules/
+│  ├─ utils/
 │  └─ index.js
 │
 ├─ discord-dashboard/
@@ -212,14 +333,16 @@ discord-bot/
 │  ├─ package.json
 │  └─ vercel.json
 │
+├─ tests/
+├─ .env.example
 ├─ package.json
-├─ DEPLOYMENT.md
+├─ DOCS.md
 └─ README.md
 ```
 
 ---
 
-## 🔗 Invite Bot
+## 🔌 Invite Bot
 
 Use the OAuth2 invite URL:
 
@@ -227,20 +350,20 @@ Use the OAuth2 invite URL:
 https://discord.com/oauth2/authorize?client_id=1511121737688023120&permissions=8&scope=bot+applications.commands
 ```
 
-### Required Scope
+Required scopes:
 
 ```txt
 bot
 applications.commands
 ```
 
-### Default Permission
+Default permission:
 
 ```txt
 Administrator
 ```
 
-`permissions=8` gives Administrator access. It is useful for development and early setup, but for production you may want to reduce permissions later. Giving everything Admin forever is convenient, and also how chaos gets a guest room.
+`permissions=8` gives Administrator access. It is useful for development and early setup. For production, reduce permissions later because giving everything Admin forever is how chaos gets a permanent guest room.
 
 ---
 
@@ -255,43 +378,62 @@ Before running this project, prepare:
 - Firebase Authentication enabled
 - Firebase Firestore enabled
 - Firebase Admin service account
-- Railway account for backend hosting
-- Vercel account for frontend hosting
+- Railway account for backend/API hosting
+- Vercel account for frontend/dashboard hosting
 
 ---
 
 ## 🔐 Environment Variables
 
-This project has two separate environments:
+This project has separate environments:
 
-1. Backend API / Discord bot env
+1. Backend API / Discord bot worker env
 2. Frontend dashboard env
 
-Do not mix them. Seriously. Frontend secrets are not secrets. They are browser souvenirs.
+Do not mix them. Frontend secrets are not secrets. They are browser souvenirs.
 
 ---
 
-## 🧠 Backend Environment
+## Backend / Worker Environment
 
-Create a `.env` file in the root project:
+Create `.env` in the root project.
 
 ```env
-TOKEN=
+# API
 API_PORT=3000
 DASHBOARD_URL=https://discord-bot-eta-ten.vercel.app
 API_SECRET=replace_with_random_secret
-FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"..."}
+
+# Firebase Admin SDK
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"...","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"...","client_id":"..."}
+
+# Discord Bot
+TOKEN=
+DISCORD_TOKEN=
+DISCORD_CLIENT_ID=
+
+# Optional server defaults
+AUTO_ROLE_ID=
+WELCOME_CHANNEL_ID=
+RULES_CHANNEL_ID=
 ```
 
 ### Backend Env Explanation
 
 | Variable | Description |
 |---|---|
-| `TOKEN` | Discord bot token |
 | `API_PORT` | Local API port |
 | `DASHBOARD_URL` | Allowed dashboard origin for CORS |
-| `API_SECRET` | Backend-only secret for trusted API access |
+| `API_SECRET` | Backend-only secret for trusted internal access |
 | `FIREBASE_SERVICE_ACCOUNT` | Firebase Admin SDK service account JSON as one-line string |
+| `TOKEN` | Discord bot token, kept for older code compatibility |
+| `DISCORD_TOKEN` | Discord bot token |
+| `DISCORD_CLIENT_ID` | Discord Application ID / Client ID |
+| `AUTO_ROLE_ID` | Optional default auto role ID |
+| `WELCOME_CHANNEL_ID` | Optional default welcome channel ID |
+| `RULES_CHANNEL_ID` | Optional rules channel ID |
+
+> For now, `TOKEN` and `DISCORD_TOKEN` can contain the same bot token if the code still supports both names.
 
 Never commit:
 
@@ -302,7 +444,7 @@ serviceAccountKey.json
 
 ---
 
-## 🌐 Frontend Dashboard Environment
+## Frontend Dashboard Environment
 
 Create `.env` inside:
 
@@ -310,7 +452,7 @@ Create `.env` inside:
 discord-dashboard/.env
 ```
 
-For local development:
+Local development:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -323,7 +465,7 @@ VITE_DISCORD_REDIRECT_URI=http://localhost:5173/login
 VITE_BOT_API_URL=http://localhost:3000
 ```
 
-For production:
+Production:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -336,31 +478,20 @@ VITE_DISCORD_REDIRECT_URI=https://discord-bot-eta-ten.vercel.app/login
 VITE_BOT_API_URL=https://discord-bot-production-2e68.up.railway.app
 ```
 
-### Frontend Env Explanation
-
-| Variable | Description |
-|---|---|
-| `VITE_FIREBASE_API_KEY` | Firebase Web App API key |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
-| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
-| `VITE_FIREBASE_APP_ID` | Firebase web app ID |
-| `VITE_DISCORD_CLIENT_ID` | Discord Application ID |
-| `VITE_DISCORD_REDIRECT_URI` | OAuth redirect URI |
-| `VITE_BOT_API_URL` | Public backend API URL |
-
-Do not put these in frontend env:
+### Do Not Put These in Frontend Env
 
 ```env
 FIREBASE_SERVICE_ACCOUNT=
 API_SECRET=
 TOKEN=
+DISCORD_TOKEN=
 ```
 
 If a secret starts with `VITE_`, it is no longer secret. Congrats, the browser owns it now.
 
 ---
 
-## 🛠️ Local Development
+## 🧪 Local Development
 
 ### 1. Install Backend Dependencies
 
@@ -368,7 +499,19 @@ If a secret starts with `VITE_`, it is no longer secret. Congrats, the browser o
 npm install
 ```
 
-### 2. Run Backend API
+### 2. Run Discord Bot Worker
+
+```bash
+npm start
+```
+
+This runs:
+
+```bash
+node src/index.js
+```
+
+### 3. Run Backend API
 
 ```bash
 npm run api
@@ -380,14 +523,32 @@ Expected output:
 Dashboard API berjalan di port 3000
 ```
 
-### 3. Install Dashboard Dependencies
+### 4. Deploy Slash Commands
+
+```bash
+npm run deploy
+```
+
+This runs:
+
+```bash
+node src/bot/deployCommands.js
+```
+
+### 5. Run Tests
+
+```bash
+npm test
+```
+
+### 6. Install Dashboard Dependencies
 
 ```bash
 cd discord-dashboard
 npm install
 ```
 
-### 4. Run Dashboard
+### 7. Run Dashboard
 
 ```bash
 npm run dev
@@ -405,11 +566,9 @@ http://localhost:5173
 
 ### 1. Create Firebase Project
 
-Use Firebase Console and create a project.
+Create a project from Firebase Console.
 
 ### 2. Enable Authentication
-
-Go to:
 
 ```txt
 Firebase Console
@@ -419,8 +578,6 @@ Firebase Console
 
 ### 3. Enable Firestore
 
-Go to:
-
 ```txt
 Firebase Console
 → Firestore Database
@@ -429,8 +586,6 @@ Firebase Console
 
 ### 4. Create Web App
 
-Go to:
-
 ```txt
 Project Settings
 → General
@@ -438,11 +593,9 @@ Project Settings
 → Web app
 ```
 
-Copy the Firebase config into `discord-dashboard/.env`.
+Copy the Firebase web config into `discord-dashboard/.env`.
 
 ### 5. Generate Service Account
-
-Go to:
 
 ```txt
 Project Settings
@@ -452,9 +605,13 @@ Project Settings
 
 Use the JSON as `FIREBASE_SERVICE_ACCOUNT` in backend env.
 
-### 6. Authorized Domains
+Convert the JSON to one line:
 
-Go to:
+```bash
+node -e "const fs=require('fs'); const p='./serviceAccountKey.json'; console.log(JSON.stringify(JSON.parse(fs.readFileSync(p,'utf8'))));"
+```
+
+### 6. Authorized Domains
 
 ```txt
 Authentication
@@ -471,7 +628,7 @@ discord-bot-eta-ten.vercel.app
 
 ---
 
-## 🎮 Discord Developer Portal Setup
+## 🧑‍💻 Discord Developer Portal Setup
 
 ### OAuth2 Redirects
 
@@ -482,13 +639,36 @@ http://localhost:5173/login
 https://discord-bot-eta-ten.vercel.app/login
 ```
 
+### Application Links
+
+Set these in the app settings:
+
+```txt
+Terms of Service URL:
+https://discord-bot-eta-ten.vercel.app/terms
+
+Privacy Policy URL:
+https://discord-bot-eta-ten.vercel.app/privacy
+```
+
+Leave these empty unless specifically implemented:
+
+```txt
+Interactions Endpoint URL:
+[empty]
+
+Linked Roles Verification URL:
+[empty]
+```
+
 ### Required Bot Intents
 
-Enable intents based on the features used by the bot:
+Enable based on features used:
 
 - Server Members Intent
 - Message Content Intent
 - Presence Intent if needed
+- Guild Message Reactions if reaction roles are used
 
 ### Invite URL Generator
 
@@ -505,11 +685,11 @@ Select permissions:
 Administrator
 ```
 
-or manually select required permissions.
+or manually select required permissions for production.
 
 ---
 
-## 🚀 Deployment
+## 🚢 Deployment
 
 ### Backend API on Railway
 
@@ -524,11 +704,13 @@ npm run api
 Required Railway env:
 
 ```env
-TOKEN=
-FIREBASE_SERVICE_ACCOUNT=
-API_SECRET=
-DASHBOARD_URL=https://discord-bot-eta-ten.vercel.app
 API_PORT=3000
+DASHBOARD_URL=https://discord-bot-eta-ten.vercel.app
+API_SECRET=
+FIREBASE_SERVICE_ACCOUNT=
+DISCORD_CLIENT_ID=
+TOKEN=
+DISCORD_TOKEN=
 ```
 
 If Railway uses `PORT`, make sure the API server supports:
@@ -542,6 +724,36 @@ Recommended fallback:
 ```js
 const port = Number(process.env.PORT ?? process.env.API_PORT ?? 3000);
 ```
+
+---
+
+### Discord Bot Worker on Railway
+
+If using a separate Railway service for the bot worker, use this start command:
+
+```bash
+npm start
+```
+
+Required Railway env:
+
+```env
+TOKEN=
+DISCORD_TOKEN=
+DISCORD_CLIENT_ID=
+FIREBASE_SERVICE_ACCOUNT=
+API_SECRET=
+DASHBOARD_URL=https://discord-bot-eta-ten.vercel.app
+```
+
+Worker notes:
+
+- `npm start` runs the bot process.
+- `npm run api` runs the backend API only.
+- Keep worker and API as separate services if possible.
+- Do not run the dashboard from Railway. The dashboard belongs on Vercel.
+
+---
 
 ### Frontend Dashboard on Vercel
 
@@ -569,17 +781,13 @@ VITE_DISCORD_REDIRECT_URI=https://discord-bot-eta-ten.vercel.app/login
 VITE_BOT_API_URL=https://discord-bot-production-2e68.up.railway.app
 ```
 
-After changing Vercel env variables, redeploy the project.
-
-Vite reads `VITE_*` variables during build. Refreshing the browser without redeploying is just modern superstition.
+After changing Vercel env variables, redeploy the project. Vite reads `VITE_*` variables during build. Refreshing the browser without redeploying is just modern superstition.
 
 ---
 
-## 🗃️ Firestore Collections
+## 🗂️ Firestore Collections
 
-The bot uses Firestore collections for configuration and feature data.
-
-Common collections:
+Common collections used by the bot:
 
 ```txt
 guildConfigs
@@ -593,9 +801,27 @@ birthdays
 customCommands
 ```
 
+Modular system may also use:
+
+```txt
+guilds/{guildId}/modules/{moduleId}
+```
+
+Example module config:
+
+```json
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "config": {
+    "channelId": "1234567890"
+  }
+}
+```
+
 ### Required Guild Config
 
-For a server to appear in dashboard, Firestore must contain:
+For a server to appear in dashboard, Firestore should contain:
 
 ```txt
 guildConfigs/{guildId}
@@ -656,6 +882,18 @@ npm run build
 npm run preview
 ```
 
+### Test Bot Worker
+
+```bash
+npm start
+```
+
+### Test Slash Command Deploy
+
+```bash
+npm run deploy
+```
+
 ---
 
 ## 🧯 Troubleshooting
@@ -669,6 +907,9 @@ Check:
 - Output directory is `dist`
 - Required `VITE_*` env variables are set
 - Vercel has been redeployed after env changes
+- Browser console does not show missing env/API errors
+
+---
 
 ### Invalid OAuth2 Redirect URI
 
@@ -690,7 +931,9 @@ Required local redirect:
 http://localhost:5173/login
 ```
 
-### Firebase: auth/configuration-not-found
+---
+
+### Firebase: `auth/configuration-not-found`
 
 Check:
 
@@ -699,15 +942,60 @@ Check:
 - `VITE_FIREBASE_PROJECT_ID` is correct
 - Authorized domains include the dashboard domain
 
+---
+
 ### Fetch Failed / Request Failed
 
 Check:
 
-- Railway backend is running
-- `VITE_BOT_API_URL` points to Railway API URL
+- Railway backend API is running
+- `VITE_BOT_API_URL` points to the Railway API URL
 - Backend has correct `DASHBOARD_URL`
 - Backend CORS allows the dashboard domain
 - Vercel was redeployed after env changes
+
+---
+
+### Worker Crash: `Cannot find module`
+
+Example:
+
+```txt
+Cannot find module '../../commands/fun/rank'
+```
+
+Fix:
+
+- Check the required file exists
+- Fix the import/require path
+- Pull latest code from GitHub
+- Run `npm start` locally before redeploying
+
+```bash
+git pull
+npm install
+npm start
+```
+
+---
+
+### Firebase Service Account Warning
+
+If you see:
+
+```txt
+FIREBASE_SERVICE_ACCOUNT belum diatur di environment variable.
+```
+
+Set `FIREBASE_SERVICE_ACCOUNT` in:
+
+- local `.env`
+- Railway API service variables
+- Railway worker service variables
+
+Use one-line JSON.
+
+---
 
 ### Server Not Showing in Dashboard
 
@@ -719,6 +1007,8 @@ Check:
 - Server ID matches Discord Guild ID
 - User logged in with the correct Discord account
 
+---
+
 ### Auto Role Not Working
 
 Check:
@@ -726,6 +1016,9 @@ Check:
 - Bot has Manage Roles permission
 - Bot role is above target role
 - Auto role is configured in dashboard
+- `AUTO_ROLE_ID` is correct if using env fallback
+
+---
 
 ### Logs Not Sending
 
@@ -737,7 +1030,7 @@ Check:
 
 ---
 
-## 🛡️ Security Notes
+## 🔒 Security Notes
 
 Do not commit:
 
@@ -750,6 +1043,7 @@ Do not expose:
 
 ```txt
 TOKEN
+DISCORD_TOKEN
 API_SECRET
 FIREBASE_SERVICE_ACCOUNT
 ```
@@ -760,13 +1054,15 @@ Rotate credentials immediately if they leak. The internet does not forgive. It s
 
 ---
 
-## 📌 Roadmap
+## 🗺️ Roadmap
 
-Potential future improvements:
+Planned or recommended improvements:
 
-- Public documentation site
+- Better dashboard module manager
+- Module config pages
+- Reaction Roles dashboard
 - Public landing page
-- Better command list page
+- Public documentation site
 - Built-in health endpoint
 - Role-based dashboard access
 - Audit log viewer
@@ -774,13 +1070,31 @@ Potential future improvements:
 - Custom dashboard themes
 - Safer granular bot permissions
 - Better onboarding for new servers
+- Backup and restore guild config
+- Plugin safety rules
 
 ---
 
-## 🤝 Credits
+## 📜 License
 
-**ABNRML Bot**  
-Created & Developed by **eG4**
+This project currently uses the license defined in `package.json`.
+
+If publishing publicly, make sure the license is clear and intentional.
+
+Recommended permissive options:
+
+- MIT
+- Apache-2.0
+- ISC
+
+Avoid copying GPL-licensed code from other bot frameworks unless the project intentionally adopts GPL-compatible terms.
+
+---
+
+## 🙌 Credits
+
+ABNRML Bot  
+Created & Developed by **Rivaldy Taufikqul Hakim / eG4**
 
 Built with:
 
@@ -795,22 +1109,6 @@ Built with:
 
 ---
 
-## 📄 License
-
-This project is currently private/personal unless stated otherwise.
-
-If you plan to open-source it, add a license such as:
-
-- MIT
-- Apache-2.0
-- GPL-3.0
-
----
-
-<div align="center">
-
 ### ABNRML Bot
 
 Built for communities that need order, automation, and a little less admin suffering.
-
-</div>
