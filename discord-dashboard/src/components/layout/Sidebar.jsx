@@ -1,20 +1,44 @@
 import { NavLink, useParams } from 'react-router-dom';
-import { BarChart3, Bot, Cake, ClipboardList, Command, Gift, LogOut, Shield, Sparkles, Star, Layers } from 'lucide-react';
+import { BarChart3, Bot, Cake, ClipboardList, Command, Gift, LogOut, Shield, Sparkles, Star, Layers, Activity, FileText, Database, SmilePlus } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth.js';
 import StatusBadge from '../ui/StatusBadge.jsx';
 import ServerSelector from '../shared/ServerSelector.jsx';
 
-const items = [
-  ['modules', 'Modules', Layers],
-  ['welcome', 'Welcome', Sparkles],
-  ['leveling', 'Leveling', Star],
-  ['moderation', 'Moderation', Shield],
-  ['automod', 'Auto Mod', Bot],
-  ['logging', 'Logging', ClipboardList],
-  ['giveaway', 'Giveaway', Gift],
-  ['birthday', 'Birthday', Cake],
-  ['commands', 'Commands', Command],
-  ['insights', 'Insights', BarChart3],
+const groups = [
+  {
+    name: 'Overview',
+    items: [
+      ['overview', 'Overview', Activity],
+      ['insights', 'Analytics', BarChart3],
+    ]
+  },
+  {
+    name: 'Features',
+    items: [
+      ['modules', 'Modules', Layers],
+      ['welcome', 'Welcome', Sparkles],
+      ['leveling', 'Leveling', Star],
+      ['giveaway', 'Giveaway', Gift],
+      ['birthday', 'Birthday', Cake],
+      ['commands', 'Commands', Command],
+      ['reaction-roles', 'Reaction Roles', SmilePlus],
+    ]
+  },
+  {
+    name: 'Moderation',
+    items: [
+      ['moderation', 'Moderation', Shield],
+      ['automod', 'Auto Mod', Bot],
+      ['logging', 'Logging', ClipboardList],
+    ]
+  },
+  {
+    name: 'Settings',
+    items: [
+      ['privacy', 'Privacy & Data', Database],
+      ['legal', 'Legal Pages', FileText],
+    ]
+  }
 ];
 
 export default function Sidebar({ open, onClose }) {
@@ -38,16 +62,25 @@ export default function Sidebar({ open, onClose }) {
         </div>
       </div>
       <ServerSelector />
-      <nav className="mt-5 grid gap-1">
-        {items.map(([path, label, Icon]) => (
-          <NavLink
-            key={path}
-            to={`/dashboard/${guildId}/${path}`}
-            onClick={onClose}
-            className={({ isActive }) => `flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${isActive ? 'border border-[#5865f2]/40 bg-[#5865f2]/20 text-white shadow-lg shadow-[#5865f2]/10' : 'border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-slate-100'}`}
-          >
-            <Icon size={18} /> <span>{label}</span>
-          </NavLink>
+      <nav className="mt-5 flex flex-col gap-5 overflow-y-auto pb-4">
+        {groups.map((group) => (
+          <div key={group.name}>
+            <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {group.name}
+            </div>
+            <div className="grid gap-1">
+              {group.items.map(([path, label, Icon]) => (
+                <NavLink
+                  key={path}
+                  to={`/dashboard/${guildId}/${path}`}
+                  onClick={onClose}
+                  className={({ isActive }) => `flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${isActive ? 'border border-[#5865f2]/40 bg-[#5865f2]/20 text-white shadow-lg shadow-[#5865f2]/10' : 'border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-slate-100'}`}
+                >
+                  <Icon size={18} /> <span>{label}</span>
+                </NavLink>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
       <button type="button" onClick={logout} className="mt-auto flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-slate-400 transition hover:border-white/10 hover:bg-white/[0.04] hover:text-slate-100">

@@ -15,6 +15,10 @@ import Birthday from '../pages/dashboard/Birthday.jsx';
 import CustomCommands from '../pages/dashboard/CustomCommands.jsx';
 import Insights from '../pages/dashboard/Insights.jsx';
 import Modules from '../pages/dashboard/Modules.jsx';
+import Overview from '../pages/dashboard/Overview.jsx';
+import ReactionRoles from '../pages/dashboard/ReactionRoles.jsx';
+import PrivacyData from '../pages/dashboard/PrivacyData.jsx';
+import LegalSettings from '../pages/dashboard/LegalSettings.jsx';
 import PageWrapper from '../components/layout/PageWrapper.jsx';
 import LoadingSkeleton from '../components/shared/LoadingSkeleton.jsx';
 
@@ -46,7 +50,8 @@ export const router = createBrowserRouter([
         path: '/dashboard/:guildId',
         element: <RequireGuild />,
         children: [
-          { index: true, element: <Navigate to="welcome" replace /> },
+          { index: true, element: <Navigate to="overview" replace /> },
+          { path: 'overview', element: <Overview /> },
           { path: 'modules', element: <Modules /> },
           { path: 'welcome', element: <Welcome /> },
           { path: 'leveling', element: <Leveling /> },
@@ -56,6 +61,9 @@ export const router = createBrowserRouter([
           { path: 'giveaway', element: <Giveaway /> },
           { path: 'birthday', element: <Birthday /> },
           { path: 'commands', element: <CustomCommands /> },
+          { path: 'reaction-roles', element: <ReactionRoles /> },
+          { path: 'privacy', element: <PrivacyData /> },
+          { path: 'legal', element: <LegalSettings /> },
           { path: 'insights', element: <Insights /> },
         ],
       },
