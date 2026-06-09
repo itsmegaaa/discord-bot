@@ -557,25 +557,33 @@ Jika slash commands belum muncul:
 3. Kick dan invite ulang bot jika perlu.
 4. Pastikan command registration/deploy command sudah dijalankan di backend/bot.
 
-### Rekomendasi Command List
+### Daftar Slash Commands
 
-Jika ingin membuat command list publik, gunakan format berikut:
+Semua slash commands yang terdaftar:
 
-| Command | Fungsi | Permission |
-|---|---|---|
-| `/help` | Menampilkan bantuan bot | Semua member |
-| `/ping` | Mengecek respons bot | Semua member |
-| `/level` | Melihat level user | Semua member |
-| `/leaderboard` | Melihat ranking level | Semua member |
-| `/birthday set` | Menyimpan tanggal ulang tahun | Semua member |
-| `/giveaway create` | Membuat giveaway | Manage Server |
-| `/giveaway end` | Mengakhiri giveaway | Manage Server |
-| `/warn` | Memberi warning | Moderator |
-| `/warnings` | Melihat warning | Moderator |
-| `/clear` | Menghapus pesan | Moderator |
-| `/config` | Menampilkan konfigurasi server | Manage Server |
+**🛡️ Moderation**
+`/ban`, `/kick`, `/warn`, `/warns`, `/mute`, `/purge`, `/raid`, `/automod`, `/logging`
 
-Catatan: sesuaikan daftar di atas dengan command yang benar-benar sudah ada di source code bot. Jangan dokumentasikan command yang belum aktif di production, nanti user bingung dan bot kelihatan halu.
+**📈 Leveling**
+`/rank`, `/leaderboard`
+
+**🎉 Giveaway & Poll**
+`/giveaway`, `/poll`
+
+**🎂 Analytics & Birthday**
+`/insights`, `/birthday`, `/config`
+
+**🎮 Fun & Community**
+`/afk`, `/cc`, `/ship`, `/profile`, `/setbio`
+
+**🔐 Privacy**
+`/mydata`, `/exportmydata`, `/deletemydata`
+
+**⚙️ Reaction Roles**
+`/reactionrole`
+
+**📚 Core**
+`/help`
 
 ---
 
