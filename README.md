@@ -271,6 +271,34 @@ These commands help users check, export, or request deletion of supported stored
 
 ---
 
+### ⌨️ Slash Commands
+
+Semua slash commands yang terdaftar:
+
+**🛡️ Moderation**
+`/ban`, `/kick`, `/warn`, `/warns`, `/mute`, `/purge`, `/raid`, `/automod`, `/logging`
+
+**📈 Leveling**
+`/rank`, `/leaderboard`
+
+**🎉 Giveaway & Poll**
+`/giveaway`, `/poll`
+
+**🎂 Analytics & Birthday**
+`/insights`, `/birthday`, `/config`
+
+**🎮 Fun & Community**
+`/afk`, `/cc`, `/ship`, `/profile`, `/setbio`
+
+**🔐 Privacy**
+`/mydata`, `/exportmydata`, `/deletemydata`
+
+**⚙️ Reaction Roles**
+`/reactionrole`
+
+**📚 Core**
+`/help`
+
 ### 📊 Server Insights
 
 View server activity and engagement data.
